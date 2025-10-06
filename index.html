@@ -6,7 +6,7 @@
   <title>$FSWITCH Rewards Calculator</title>
   <style>
     :root{
-      --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe; --good:#8fe388; --warn:#ffcc66;
+      --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe; --good:#8fe388;
     }
     *{box-sizing:border-box}
     body{
@@ -36,11 +36,6 @@
     input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(110,168,254,.15)}
     .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
     .help{font-size:.9rem; color:var(--muted)}
-    .pill{
-      display:inline-block; font-size:.85rem; padding:6px 10px; border-radius:999px; background:#0f1330; border:1px solid #2a2f58; margin-right:6px;
-    }
-    .pill.good{border-color:#2a5b3a; background:#0e1b14; color:var(--good)}
-    .pill.warn{border-color:#5b4a2a; background:#1b160e; color:var(--warn)}
     .kpi{
       display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px
     }
@@ -51,7 +46,6 @@
     .val{font-weight:800; font-size:1.25rem; margin-top:4px}
     footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
     .note{font-size:.9rem; color:var(--muted); margin-top:8px}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
     .seg{
       display:inline-flex; gap:6px; padding:6px; background:#0f1330; border:1px solid #2a2f58; border-radius:999px; margin:8px 0 4px;
     }
@@ -68,7 +62,7 @@
 <body>
   <header>
     <h1>$FSWITCH Rewards Calculator</h1>
-    <p>Fixed tax: <span class="pill warn">7% (locked)</span> &nbsp;→&nbsp; Back to holders: <span class="pill good">4.55% of daily volume (locked)</span></p>
+    <p class="help">Estimate your holder rewards based on daily volume and your ownership.</p>
   </header>
 
   <div class="wrap">
@@ -85,10 +79,9 @@
           <div>
             <label for="supply">Total Current Supply (adjustable)</label>
             <input id="supply" type="number" min="0" step="0.000000001" />
-            <div class="help mono">Prefilled: 860,958,483.734133327</div>
+            <div class="help">Prefilled: 860,958,483.734133327</div>
           </div>
         </div>
-        <div class="note">The calculator divides the holders&rsquo; pool (4.55% of daily volume) by your ownership share (your holdings / total supply). Percent values (7% tax and 4.55% to holders) are <b>locked</b>.</div>
       </section>
 
       <section class="card">
@@ -107,42 +100,30 @@
             <div class="help">= holdings / total supply</div>
           </div>
           <div class="box">
-            <h3>Holders&rsquo; Pool (per day)</h3>
+            <h3>Holders’ Pool (70% of 7% tax)</h3>
             <div class="val" id="poolAmount">0.00</div>
-            <div class="help">= daily volume × 4.55%</div>
+            <div class="help">Based on daily volume</div>
           </div>
           <div class="box">
             <h3 id="periodRewardsLabel">Your Rewards (per day)</h3>
             <div class="val" id="yourRewards">0.00</div>
-            <div class="help">= pool × your ownership × period</div>
+            <div class="help">Proportional to your ownership and period</div>
           </div>
           <div class="box">
-            <h3>Your Share of the 7% Tax</h3>
+            <h3>Your Share of the Holders 70% of the 7% tax</h3>
             <div class="val" id="shareOfSeven">0.000000%</div>
-            <div class="help">= 4.55% × your ownership (as % of daily volume)</div>
+            <div class="help">Shown as a % of daily volume</div>
           </div>
         </div>
-        <div class="note">Remainder of tax not sent to holders (locked): <b>2.45%</b> of daily volume.</div>
       </section>
     </div>
-
-    <section class="card">
-      <h2>Formulae</h2>
-      <div class="mono help">
-        holders_pool = daily_volume × 0.0455<br/>
-        ownership = holdings / total_supply<br/>
-        your_share_of_7pct = 0.0455 × ownership &nbsp; (as a percentage of daily volume)<br/>
-        period_multiplier: Daily=1, Weekly=7, Monthly=30<br/>
-        your_rewards_amount = daily_volume × your_share_of_7pct × period_multiplier
-      </div>
-    </section>
   </div>
 
-  <footer>© 2025 $FSWITCH Rewards Calculator &middot; Percentages 7% (tax) and 4.55% (to holders) are fixed / non-editable.</footer>
+  <footer>© 2025 $FSWITCH Rewards Calculator</footer>
 
   <script>
-    const LOCKED_TAX = 0.07;     // locked (display only)
-    const LOCKED_TO_HOLDERS = 0.0455; // locked (display only)
+    // INTERNAL CONSTANTS (hidden from UI)
+    const INTERNAL_HOLDER_RATE = 0.0455; // hidden actual % used in math
 
     const els = {
       volume: document.getElementById('volume'),
@@ -159,7 +140,6 @@
       btnMonthly: document.getElementById('btnMonthly'),
     };
 
-    // Prefill supply
     els.supply.value = "860958483.734133327";
 
     const PERIODS = {
@@ -183,7 +163,6 @@
       const conf = PERIODS[name];
       els.rewardsTitle.textContent = conf.title;
       els.periodRewardsLabel.textContent = conf.label;
-      // update aria-pressed
       els.btnDaily.setAttribute('aria-pressed', String(name==="Daily"));
       els.btnWeekly.setAttribute('aria-pressed', String(name==="Weekly"));
       els.btnMonthly.setAttribute('aria-pressed', String(name==="Monthly"));
@@ -195,11 +174,11 @@
       const holdings = parseFloat(els.holdings.value) || 0;
       const supply = parseFloat(els.supply.value) || 0;
 
-      const ownership = supply > 0 ? (holdings / supply) : 0;                 // fraction
-      const holdersPool = volume * LOCKED_TO_HOLDERS;                          // amount per day
-      const shareOfSeven = LOCKED_TO_HOLDERS * ownership;                      // fraction of daily volume
+      const ownership = supply > 0 ? (holdings / supply) : 0;
+      const holdersPool = volume * INTERNAL_HOLDER_RATE;
+      const shareOfSeven = INTERNAL_HOLDER_RATE * ownership;
       const periodMult = PERIODS[currentPeriod].mult;
-      const yourRewards = volume * shareOfSeven * periodMult;                  // amount for period
+      const yourRewards = volume * shareOfSeven * periodMult;
 
       els.ownership.textContent = fmtPct(ownership, 6);
       els.poolAmount.textContent = fmtNum(holdersPool, 2);
@@ -215,10 +194,4 @@
 
     els.btnDaily.addEventListener('click', () => setPeriod('Daily'));
     els.btnWeekly.addEventListener('click', () => setPeriod('Weekly'));
-    els.btnMonthly.addEventListener('click', () => setPeriod('Monthly'));
-
-    // initial render
-    setPeriod('Daily');
-  </script>
-</body>
-</html>
+    els.btnMonthly.addEventListener('
