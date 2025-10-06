@@ -4,21 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$FSWITCH Rewards Calculator</title>
+
+  <!-- Icons / Favicon -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="fswitch_icon_512.png" sizes="512x512">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#0f1221">
+
   <style>
     :root{
-      --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe; --good:#8fe388;
+      --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe;
     }
     *{box-sizing:border-box}
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
-      background:linear-gradient(180deg,#0a0d1a, var(--bg) 200px) fixed;
+      background:linear-gradient(180deg,#0a0d1a,var(--bg) 200px) fixed;
       color:var(--text);
       line-height:1.4;
       padding-bottom:84px; /* space for mobile sticky bar */
     }
-    header{padding:24px 16px 8px; text-align:center}
-    header h1{margin:.2rem 0 0; font-size:1.5rem; font-weight:800; letter-spacing:.2px}
+    header{padding:16px 16px 8px; text-align:center}
+    header h1{margin:.6rem 0 0; font-size:1.5rem; font-weight:800; letter-spacing:.2px}
     header p{margin:.25rem 0; color:var(--muted); font-size:.95rem}
+    .banner{
+      width:100%; height:auto; max-height:360px; display:block; object-fit:cover;
+      border-radius:12px; margin:8px auto;
+    }
     .wrap{max-width:980px; margin:0 auto; padding:8px 16px 32px}
     .grid{display:grid; grid-template-columns:1fr; gap:16px}
     @media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
@@ -64,7 +75,6 @@
     .btn:hover{background:#13205a}
     .btn.primary{background:var(--accent); color:#0a0f2a; border-color:#6ea8fe}
     .btn.primary:hover{filter:brightness(0.95)}
-
     /* Mobile sticky bar */
     .sticky-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:1000;
@@ -75,17 +85,16 @@
     }
     .sticky-bar .btn{flex:1; max-width:520px}
     @media (min-width:880px){
-      /* Hide sticky bar on desktop (we show the normal button) */
       .sticky-bar{display:none}
       body{padding-bottom:0}
     }
-
     footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
     .title-line{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
   </style>
 </head>
 <body>
   <header>
+    <img src="fswitch_banner_1500x500.jpg" alt="$FSWITCH banner" class="banner">
     <h1>$FSWITCH Rewards Calculator</h1>
     <p class="help">Estimate your holder rewards based on daily volume and your ownership.</p>
   </header>
@@ -94,6 +103,7 @@
     <div class="grid">
       <section class="card">
         <h2>Inputs</h2>
+
         <label for="volume">Daily Volume</label>
         <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
 
@@ -130,19 +140,9 @@
             <div class="help">= holdings / total supply</div>
           </div>
           <div class="box">
-            <h3>Holders’ Pool (70% of 7% tax)</h3>
-            <div class="val" id="poolAmount">0.00</div>
-            <div class="help">Based on daily volume</div>
-          </div>
-          <div class="box">
             <h3 id="periodRewardsLabel">Your Rewards (per day)</h3>
             <div class="val" id="yourRewards">0.00</div>
             <div class="help">Proportional to your ownership and period</div>
-          </div>
-          <div class="box">
-            <h3>Your Share of the Holders 70% of the 7% tax</h3>
-            <div class="val" id="shareOfSeven">0.000000%</div>
-            <div class="help">Shown as a % of daily volume</div>
           </div>
         </div>
       </section>
@@ -157,17 +157,14 @@
   <footer>© 2025 $FSWITCH Rewards Calculator</footer>
 
   <script>
-    // Hidden math rate (do not show in UI)
-    const INTERNAL_HOLDER_RATE = 0.0455; // 4.55%
+    const INTERNAL_HOLDER_RATE = 0.0455; // 4.55% (hidden math logic)
 
     const els = {
       volume: document.getElementById('volume'),
       holdings: document.getElementById('holdings'),
       supply: document.getElementById('supply'),
       ownership: document.getElementById('ownership'),
-      poolAmount: document.getElementById('poolAmount'),
       yourRewards: document.getElementById('yourRewards'),
-      shareOfSeven: document.getElementById('shareOfSeven'),
       rewardsTitle: document.getElementById('rewardsTitle'),
       periodRewardsLabel: document.getElementById('periodRewardsLabel'),
       btnDaily: document.getElementById('btnDaily'),
@@ -177,7 +174,6 @@
       calcBtnSticky: document.getElementById('calcBtnSticky'),
     };
 
-    // Auto-populate supply; still editable
     els.supply.value = "860958483.734133327";
 
     const PERIODS = {
@@ -212,27 +208,19 @@
       const supply = parseFloat(els.supply.value) || 0;
 
       const ownership = supply > 0 ? (holdings / supply) : 0;
-      const holdersPool = volume * INTERNAL_HOLDER_RATE;   // per day
-      const shareOfSeven = INTERNAL_HOLDER_RATE * ownership; // fraction of daily volume
       const periodMult = PERIODS[currentPeriod].mult;
-      const yourRewards = volume * shareOfSeven * periodMult;
+      const yourRewards = volume * INTERNAL_HOLDER_RATE * ownership * periodMult;
 
       els.ownership.textContent = fmtPct(ownership, 6);
-      els.poolAmount.textContent = fmtNum(holdersPool, 2);
       els.yourRewards.textContent = fmtNum(yourRewards, 2);
-      els.shareOfSeven.textContent = fmtPct(shareOfSeven, 6);
     }
 
-    // Buttons: desktop and mobile sticky both trigger the same calc
     els.calcBtn.addEventListener('click', recalc);
     els.calcBtnSticky.addEventListener('click', recalc);
-
-    // Period toggle buttons
     els.btnDaily.addEventListener('click', () => { setPeriod('Daily'); recalc(); });
     els.btnWeekly.addEventListener('click', () => { setPeriod('Weekly'); recalc(); });
     els.btnMonthly.addEventListener('click', () => { setPeriod('Monthly'); recalc(); });
 
-    // Initial render
     setPeriod('Daily');
     recalc();
   </script>
