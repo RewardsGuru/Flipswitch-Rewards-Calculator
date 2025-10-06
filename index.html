@@ -11,6 +11,20 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#0f1221">
 
+  <!-- Open Graph / Twitter Cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="$FSWITCH Rewards Calculator">
+  <meta property="og:description" content="Estimate your Daily / Weekly / Monthly $XRP rewards.">
+  <meta property="og:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="$FSWITCH Rewards Calculator">
+  <meta name="twitter:description" content="Estimate your Daily / Weekly / Monthly $XRP rewards.">
+  <meta name="twitter:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
+
   <style>
     :root{
       --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe;
@@ -21,7 +35,7 @@
       background:linear-gradient(180deg,#0a0d1a,var(--bg) 200px) fixed;
       color:var(--text);
       line-height:1.4;
-      padding-bottom:84px; /* space for mobile sticky bar */
+      padding-bottom:84px;
     }
     header{padding:16px 16px 8px; text-align:center}
     header h1{margin:.6rem 0 0; font-size:1.5rem; font-weight:800; letter-spacing:.2px}
@@ -75,7 +89,6 @@
     .btn:hover{background:#13205a}
     .btn.primary{background:var(--accent); color:#0a0f2a; border-color:#6ea8fe}
     .btn.primary:hover{filter:brightness(0.95)}
-    /* Mobile sticky bar */
     .sticky-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:1000;
       background:rgba(15,19,48,.9); backdrop-filter: blur(6px);
@@ -89,12 +102,11 @@
       body{padding-bottom:0}
     }
     footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
-    .title-line{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
   </style>
 </head>
 <body>
   <header>
-    <img src="fswitch_banner_1500x500.jpg" alt="$FSWITCH banner" class="banner">
+    <img src="fswitch_banner_1500x500%201.jpg" alt="$FSWITCH banner" class="banner" onerror="this.style.display='none'">
     <h1>$FSWITCH Rewards Calculator</h1>
     <p class="help">Estimate your holder rewards based on daily volume and your ownership.</p>
   </header>
@@ -130,9 +142,7 @@
       </section>
 
       <section class="card">
-        <div class="title-line">
-          <h2 id="rewardsTitle">Your estimated Daily $XRP Rewards</h2>
-        </div>
+        <h2 id="rewardsTitle">Your estimated Daily $XRP Rewards</h2>
         <div class="kpi">
           <div class="box">
             <h3>Your Ownership</h3>
@@ -149,7 +159,6 @@
     </div>
   </div>
 
-  <!-- Mobile sticky action bar -->
   <div class="sticky-bar">
     <button id="calcBtnSticky" class="btn primary">Calculate My Rewards</button>
   </div>
@@ -157,7 +166,7 @@
   <footer>© 2025 $FSWITCH Rewards Calculator</footer>
 
   <script>
-    const INTERNAL_HOLDER_RATE = 0.0455; // 4.55% (hidden math logic)
+    const INTERNAL_HOLDER_RATE = 0.0455;
 
     const els = {
       volume: document.getElementById('volume'),
