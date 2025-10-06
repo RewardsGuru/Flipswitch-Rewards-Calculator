@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>$FSWITCH Rewards Calculator</title>
+  <style>
+    :root{
+      --bg:#0f1221; --card:#171a2f; --text:#eef1ff; --muted:#aab0d6; --accent:#6ea8fe; --good:#8fe388; --warn:#ffcc66;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      background:linear-gradient(180deg,#0a0d1a, var(--bg) 200px) fixed;
+      color:var(--text);
+      line-height:1.4;
+    }
+    header{padding:24px 16px 8px; text-align:center}
+    header h1{margin:.2rem 0 0; font-size:1.5rem; font-weight:800; letter-spacing:.2px}
+    header p{margin:.25rem 0; color:var(--muted); font-size:.95rem}
+    .wrap{max-width:980px; margin:0 auto; padding:8px 16px 32px}
+    .grid{display:grid; grid-template-columns:1fr; gap:16px}
+    @media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
+    .card{
+      background:var(--card);
+      border:1px solid #222648;
+      border-radius:12px; padding:16px;
+      box-shadow:0 6px 24px rgba(0,0,0,.25);
+    }
+    .card h2{margin:.1rem 0 .6rem; font-size:1.05rem}
+    label{display:block; font-weight:600; margin:.4rem 0 .25rem}
+    input{
+      width:100%; padding:10px 12px; border-radius:8px; border:1px solid #2a2f58;
+      background:#0f1330; color:var(--text); font-size:1rem;
+    }
+    input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(110,168,254,.15)}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .help{font-size:.9rem; color:var(--muted)}
+    .pill{
+      display:inline-block; font-size:.85rem; padding:6px 10px; border-radius:999px; background:#0f1330; border:1px solid #2a2f58; margin-right:6px;
+    }
+    .pill.good{border-color:#2a5b3a; background:#0e1b14; color:var(--good)}
+    .pill.warn{border-color:#5b4a2a; background:#1b160e; color:var(--warn)}
+    .kpi{
+      display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px
+    }
+    .kpi .box{
+      background:#101433; border:1px solid #212a55; border-radius:10px; padding:12px
+    }
+    .box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:600}
+    .val{font-weight:800; font-size:1.25rem; margin-top:4px}
+    footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
+    .note{font-size:.9rem; color:var(--muted); margin-top:8px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
+    .seg{
+      display:inline-flex; gap:6px; padding:6px; background:#0f1330; border:1px solid #2a2f58; border-radius:999px; margin:8px 0 4px;
+    }
+    .seg button{
+      appearance:none; border:1px solid transparent; background:transparent; color:var(--text);
+      padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:700; font-size:.95rem;
+    }
+    .seg button[aria-pressed="true"]{
+      background:var(--accent); color:#0a0f2a; border-color:#6ea8fe;
+    }
+    .title-line{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>$FSWITCH Rewards Calculator</h1>
+    <p>Fixed tax: <span class="pill warn">7% (locked)</span> &nbsp;→&nbsp; Back to holders: <span class="pill good">4.55% of daily volume (locked)</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>Inputs</h2>
+        <label for="volume">Daily Volume (enter a number &mdash; currency-agnostic)</label>
+        <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
+        <div class="row">
+          <div>
+            <label for="holdings">Your Holdings (tokens)</label>
+            <input id="holdings" type="number" min="0" step="0.000000001" placeholder="e.g., 1_000_000" />
+          </div>
+          <div>
+            <label for="supply">Total Current Supply (adjustable)</label>
+            <input id="supply" type="number" min="0" step="0.000000001" />
+            <div class="help mono">Prefilled: 860,958,483.734133327</div>
+          </div>
+        </div>
+        <div class="note">The calculator divides the holders&rsquo; pool (4.55% of daily volume) by your ownership share (your holdings / total supply). Percent values (7% tax and 4.55% to holders) are <b>locked</b>.</div>
+      </section>
+
+      <section class="card">
+        <div class="title-line">
+          <h2 id="rewardsTitle">Your estimated Daily $XRP Rewards</h2>
+          <div class="seg" role="tablist" aria-label="Projection period">
+            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
+            <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
+            <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="box">
+            <h3>Your Ownership</h3>
+            <div class="val" id="ownership">0.000000%</div>
+            <div class="help">= holdings / total supply</div>
+          </div>
+          <div class="box">
+            <h3>Holders&rsquo; Pool (per day)</h3>
+            <div class="val" id="poolAmount">0.00</div>
+            <div class="help">= daily volume × 4.55%</div>
+          </div>
+          <div class="box">
+            <h3 id="periodRewardsLabel">Your Rewards (per day)</h3>
+            <div class="val" id="yourRewards">0.00</div>
+            <div class="help">= pool × your ownership × period</div>
+          </div>
+          <div class="box">
+            <h3>Your Share of the 7% Tax</h3>
+            <div class="val" id="shareOfSeven">0.000000%</div>
+            <div class="help">= 4.55% × your ownership (as % of daily volume)</div>
+          </div>
+        </div>
+        <div class="note">Remainder of tax not sent to holders (locked): <b>2.45%</b> of daily volume.</div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Formulae</h2>
+      <div class="mono help">
+        holders_pool = daily_volume × 0.0455<br/>
+        ownership = holdings / total_supply<br/>
+        your_share_of_7pct = 0.0455 × ownership &nbsp; (as a percentage of daily volume)<br/>
+        period_multiplier: Daily=1, Weekly=7, Monthly=30<br/>
+        your_rewards_amount = daily_volume × your_share_of_7pct × period_multiplier
+      </div>
+    </section>
+  </div>
+
+  <footer>© 2025 $FSWITCH Rewards Calculator &middot; Percentages 7% (tax) and 4.55% (to holders) are fixed / non-editable.</footer>
+
+  <script>
+    const LOCKED_TAX = 0.07;     // locked (display only)
+    const LOCKED_TO_HOLDERS = 0.0455; // locked (display only)
+
+    const els = {
+      volume: document.getElementById('volume'),
+      holdings: document.getElementById('holdings'),
+      supply: document.getElementById('supply'),
+      ownership: document.getElementById('ownership'),
+      poolAmount: document.getElementById('poolAmount'),
+      yourRewards: document.getElementById('yourRewards'),
+      shareOfSeven: document.getElementById('shareOfSeven'),
+      rewardsTitle: document.getElementById('rewardsTitle'),
+      periodRewardsLabel: document.getElementById('periodRewardsLabel'),
+      btnDaily: document.getElementById('btnDaily'),
+      btnWeekly: document.getElementById('btnWeekly'),
+      btnMonthly: document.getElementById('btnMonthly'),
+    };
+
+    // Prefill supply
+    els.supply.value = "860958483.734133327";
+
+    const PERIODS = {
+      Daily:   {mult: 1,  title: "Your estimated Daily $XRP Rewards",   label: "Your Rewards (per day)"},
+      Weekly:  {mult: 7,  title: "Your estimated Weekly $XRP Rewards",  label: "Your Rewards (per week)"},
+      Monthly: {mult: 30, title: "Your estimated Monthly $XRP Rewards", label: "Your Rewards (per month)"},
+    };
+    let currentPeriod = "Daily";
+
+    function fmtNum(n, decimals=2){
+      if (!isFinite(n)) return "0.00";
+      return Number(n).toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
+    }
+    function fmtPct(x, decimals=6){
+      if (!isFinite(x)) return "0.000000%";
+      return (x*100).toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals }) + "%";
+    }
+
+    function setPeriod(name){
+      currentPeriod = name;
+      const conf = PERIODS[name];
+      els.rewardsTitle.textContent = conf.title;
+      els.periodRewardsLabel.textContent = conf.label;
+      // update aria-pressed
+      els.btnDaily.setAttribute('aria-pressed', String(name==="Daily"));
+      els.btnWeekly.setAttribute('aria-pressed', String(name==="Weekly"));
+      els.btnMonthly.setAttribute('aria-pressed', String(name==="Monthly"));
+      recalc();
+    }
+
+    function recalc(){
+      const volume = parseFloat(els.volume.value) || 0;
+      const holdings = parseFloat(els.holdings.value) || 0;
+      const supply = parseFloat(els.supply.value) || 0;
+
+      const ownership = supply > 0 ? (holdings / supply) : 0;                 // fraction
+      const holdersPool = volume * LOCKED_TO_HOLDERS;                          // amount per day
+      const shareOfSeven = LOCKED_TO_HOLDERS * ownership;                      // fraction of daily volume
+      const periodMult = PERIODS[currentPeriod].mult;
+      const yourRewards = volume * shareOfSeven * periodMult;                  // amount for period
+
+      els.ownership.textContent = fmtPct(ownership, 6);
+      els.poolAmount.textContent = fmtNum(holdersPool, 2);
+      els.yourRewards.textContent = fmtNum(yourRewards, 2);
+      els.shareOfSeven.textContent = fmtPct(shareOfSeven, 6);
+    }
+
+    ['input','change','keyup'].forEach(ev => {
+      els.volume.addEventListener(ev, recalc);
+      els.holdings.addEventListener(ev, recalc);
+      els.supply.addEventListener(ev, recalc);
+    });
+
+    els.btnDaily.addEventListener('click', () => setPeriod('Daily'));
+    els.btnWeekly.addEventListener('click', () => setPeriod('Weekly'));
+    els.btnMonthly.addEventListener('click', () => setPeriod('Monthly'));
+
+    // initial render
+    setPeriod('Daily');
+  </script>
+</body>
+</html>
