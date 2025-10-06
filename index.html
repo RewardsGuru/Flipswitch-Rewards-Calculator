@@ -32,7 +32,7 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 
-/* Dark base */
+/* Base body and layout */
 body{
   margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
   color:var(--text); line-height:1.45; padding-bottom:84px;
@@ -40,133 +40,101 @@ body{
   overflow-x:hidden;
 }
 
-/* ===== CRACKLING LIGHTNING LAYER ===== */
-.bg-lightning{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-}
-.bg-lightning svg{ width:100%; height:100%; display:block; filter:contrast(140%); }
-@keyframes flick1{ 0%,9%{opacity:.15} 10%{opacity:1} 12%{opacity:.2} 22%{opacity:.9} 25%,100%{opacity:.18} }
-@keyframes flick2{ 0%,14%{opacity:.1} 15%{opacity:.95} 17%{opacity:.18} 40%{opacity:.7} 43%,100%{opacity:.15} }
-@keyframes flick3{ 0%,39%{opacity:.12} 40%{opacity:1} 42%{opacity:.2} 58%{opacity:.85} 60%,100%{opacity:.16} }
-@keyframes flash{ 0%{opacity:.0} 5%{opacity:.35} 8%{opacity:.0} 100%{opacity:0} }
-
-/* Bring content above lightning */
-header, .wrap, .sticky-bar, footer{ position:relative; z-index:1 }
+/* Keep lightning etc */
+.bg-lightning{position:fixed; inset:0; z-index:0; pointer-events:none;}
+.bg-lightning svg{width:100%;height:100%;display:block;filter:contrast(140%);}
+@keyframes flick1{0%,9%{opacity:.15}10%{opacity:1}12%{opacity:.2}22%{opacity:.9}25%,100%{opacity:.18}}
+@keyframes flick2{0%,14%{opacity:.1}15%{opacity:.95}17%{opacity:.18}40%{opacity:.7}43%,100%{opacity:.15}}
+@keyframes flick3{0%,39%{opacity:.12}40%{opacity:1}42%{opacity:.2}58%{opacity:.85}60%,100%{opacity:.16}}
+@keyframes flash{0%{opacity:.0}5%{opacity:.35}8%{opacity:.0}100%{opacity:0}}
+header, .wrap, .sticky-bar, footer{position:relative;z-index:1}
 
 /* Header */
 header{padding:16px 16px 8px; text-align:center}
-header h1{margin:.6rem 0 0; font-size:1.6rem; font-weight:900; letter-spacing:.3px;
-  text-shadow:0 2px 12px rgba(103,198,255,.15), 0 0 10px rgba(255,90,0,.08)}
+header h1{margin:.6rem 0 0; font-size:1.6rem; font-weight:900; letter-spacing:.3px; text-shadow:0 2px 12px rgba(103,198,255,.15), 0 0 10px rgba(255,90,0,.08)}
 header p{margin:.25rem 0; color:var(--muted); font-size:.95rem}
 .banner{width:100%; max-height:360px; display:block; object-fit:cover; border-radius:12px; margin:8px auto; box-shadow:0 10px 28px rgba(0,0,0,.45)}
 
-.wrap{max-width:980px; margin:0 auto; padding:8px 16px 32px}
-.grid{display:grid; grid-template-columns:1fr; gap:16px}
-@media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
+.wrap{max-width:980px;margin:0 auto;padding:8px 16px 32px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:880px){.grid{grid-template-columns:1fr 1fr}}
 
-.card{background:var(--card); border:1px solid #1f2743; border-radius:16px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.45)}
-.card h2{margin:.1rem 0 .6rem; font-size:1.05rem}
+.card{background:var(--card);border:1px solid #1f2743;border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.card h2{margin:.1rem 0 .6rem;font-size:1.05rem}
 
-/* Original positions */
-label{display:block; font-weight:700; margin:.55rem 0 .3rem; color:var(--muted)}
-.row{display:grid; grid-template-columns:1fr 1fr; gap:12px;} /* always side-by-side */
+label{display:block;font-weight:700;margin:.55rem 0 .3rem;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-/* Single fiery input glow */
 input{
-  width:100%; padding:12px 14px; border-radius:12px;
-  border:1px solid #1f2743; background:#0c111a; color:var(--text); font-size:1rem;
-  outline:none; transition:border-color .2s ease, box-shadow .25s ease, background .25s ease;
+  width:100%;padding:12px 14px;border-radius:12px;border:1px solid #1f2743;
+  background:#0c111a;color:var(--text);font-size:1rem;
+  outline:none;transition:border-color .2s ease, box-shadow .25s ease, background .25s ease;
 }
 input:hover{border-color:#2c3446}
 input:focus{
-  border-color:transparent; background:#0b1019;
+  border-color:transparent;background:#0b1019;
   box-shadow:
     0 0 0 2px rgba(255,122,26,.85),
     0 0 22px 10px rgba(255,90,0,.32),
     inset 0 0 12px rgba(255,208,138,.18);
 }
 
-.help{font-size:.9rem; color:var(--muted)}
-.kpi{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px}
-.kpi .box{background:#0e141c; border:1px solid #1f2a33; border-radius:12px; padding:12px; box-shadow:inset 0 0 24px rgba(103,198,255,.05)}
-.box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:700}
-.val{font-weight:900; font-size:1.25rem; margin-top:6px; text-shadow:0 0 10px rgba(103,198,255,.22)}
+.help{font-size:.9rem;color:var(--muted)}
+.kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+.kpi .box{background:#0e141c;border:1px solid #1f2a33;border-radius:12px;padding:12px;box-shadow:inset 0 0 24px rgba(103,198,255,.05)}
+.box h3{margin:0;font-size:.9rem;color:var(--muted);font-weight:700}
+.val{font-weight:900;font-size:1.25rem;margin-top:6px;text-shadow:0 0 10px rgba(103,198,255,.22)}
 
-.seg{display:inline-flex; gap:6px; padding:6px; background:#0b1018; border:1px solid #1f2743; border-radius:999px; margin:8px 0 4px; box-shadow:inset 0 0 18px rgba(255,90,0,.06)}
-.seg button{appearance:none; border:1px solid transparent; background:transparent; color:var(--text); padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:800; font-size:.95rem}
-.seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--fire2),var(--fire1)); color:#190c04; border-color:#ff6a10; text-shadow:0 1px 0 rgba(255,240,210,.6); box-shadow:0 6px 16px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset}
+.seg{display:inline-flex;gap:6px;padding:6px;background:#0b1018;border:1px solid #1f2743;border-radius:999px;margin:8px 0 4px;box-shadow:inset 0 0 18px rgba(255,90,0,.06)}
+.seg button{appearance:none;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:800;font-size:.95rem}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;border-color:#ff6a10;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 6px 16px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset}
 
-.actions{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-.btn{appearance:none; border:1px solid #ff6a10; background:linear-gradient(180deg,var(--fire2),var(--fire1)); color:#190c04; padding:12px 16px; border-radius:14px; cursor:pointer; font-weight:900; font-size:1rem; text-shadow:0 1px 0 rgba(255,240,210,.6); box-shadow:0 10px 24px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset; transition:transform .08s ease, box-shadow .2s ease, filter .2s ease}
+.actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;border:1px solid #ff6a10;background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:900;font-size:1rem;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 10px 24px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset;transition:transform .08s ease,box-shadow .2s ease,filter .2s ease}
 .btn:hover{filter:saturate(1.05)}
-.btn:active{transform:translateY(1px); box-shadow:0 8px 18px rgba(255,90,0,.28), 0 0 0 2px rgba(255,122,26,.55) inset}
+.btn:active{transform:translateY(1px);box-shadow:0 8px 18px rgba(255,90,0,.28),0 0 0 2px rgba(255,122,26,.55) inset}
 .btn.primary{background:linear-gradient(180deg,var(--fire2),var(--fire1))}
 
-.sticky-bar{position:fixed; left:0; right:0; bottom:0; z-index:1; background:rgba(10,14,22,.92); backdrop-filter:blur(6px); border-top:1px solid #1f2743; padding:10px 12px; display:flex; gap:10px; justify-content:center; align-items:center}
-.sticky-bar .btn{flex:1; max-width:520px}
-@media (min-width:880px){ .sticky-bar{display:none} body{padding-bottom:0} }
-
-footer{opacity:.9; text-align:center; padding:30px 10px 40px; color:var(--muted); font-size:.85rem}
-footer img{margin-top:10px; width:220px; height:auto; opacity:0.95; border-radius:6px}
-
-/* iOS: avoid zoom on focus */
-@supports (-webkit-touch-callout: none){ input{ font-size:16px } }
-
-/* Reduce motion: dim bolts */
-@media (prefers-reduced-motion: reduce){
-  .bg-lightning .bolt, .bg-lightning .flash { animation: none !important; opacity: .18 !important; }
+/* Sticky bar fix so it floats over footer */
+.sticky-bar{
+  position:fixed;left:0;right:0;bottom:0;
+  z-index:9999; /* on top */
+  background:rgba(10,14,22,.92);backdrop-filter:blur(6px);
+  border-top:1px solid #1f2743;
+  padding:10px 12px max(10px,env(safe-area-inset-bottom));
+  display:flex;gap:10px;justify-content:center;align-items:center;
+  box-shadow:0 -6px 18px rgba(0,0,0,.45);
 }
+.sticky-bar .btn{flex:1;max-width:520px}
+@media (max-width:879.98px){
+  footer{margin-bottom:calc(76px + env(safe-area-inset-bottom));}
+}
+@media (min-width:880px){
+  .sticky-bar{display:none}
+  body{padding-bottom:0}
+}
+
+footer{opacity:.9;text-align:center;padding:30px 10px 40px;color:var(--muted);font-size:.85rem;position:relative;z-index:1}
+footer img{margin-top:10px;width:220px;height:auto;opacity:0.95;border-radius:6px}
+
+@supports (-webkit-touch-callout: none){input{font-size:16px}}
 </style>
 </head>
 
 <body>
-  <!-- CRACKLING LIGHTNING (hand-drawn bolt paths with glow + flicker) -->
   <div class="bg-lightning" aria-hidden="true">
     <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
       <defs>
-        <!-- Blue/white outer glow -->
         <filter id="boltGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2.5" result="b"/>
-          <feMerge>
-            <feMergeNode in="b"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+          <feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <linearGradient id="boltStroke" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--bolt-core)"/>
-          <stop offset="100%" stop-color="var(--bolt-blue)"/>
+          <stop offset="0%" stop-color="var(--bolt-core)"/><stop offset="100%" stop-color="var(--bolt-blue)"/>
         </linearGradient>
       </defs>
-
-      <!-- Random strobe flash across background -->
       <rect class="flash" x="0" y="0" width="1000" height="1000" fill="rgba(180,225,255,0.10)" style="animation:flash 3.4s infinite both;"/>
-
-      <!-- Bolt set A -->
       <g stroke="url(#boltStroke)" stroke-width="3.2" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick1 2.8s infinite;">
-        <path d="M 50 120 L 120 190 L 160 230 L 220 280 L 260 360 L 320 420 L 380 470 L 430 540 L 490 600 L 560 650 L 620 720 L 700 760 L 780 820"/>
-        <path d="M 200 40 L 260 100 L 320 160 L 380 210 L 430 260 L 470 320 L 520 360 L 580 420 L 650 450 L 720 520 L 790 560 L 860 640"/>
-        <path d="M 40 520 L 100 560 L 150 610 L 210 650 L 260 710 L 320 740 L 370 800 L 430 830 L 520 880 L 610 910 L 720 940"/>
-        <!-- branches -->
-        <path d="M 380 470 L 360 520 L 340 560"/>
-        <path d="M 560 650 L 540 690 L 520 740"/>
-        <path d="M 700 760 L 690 800 L 680 840"/>
-      </g>
-
-      <!-- Bolt set B (different timing) -->
-      <g stroke="url(#boltStroke)" stroke-width="2.8" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick2 3.6s infinite;">
-        <path d="M 980 120 L 900 180 L 840 240 L 780 300 L 740 360 L 700 420 L 650 470 L 600 520 L 560 560 L 520 620 L 470 660 L 430 720 L 380 760 L 330 820 L 290 860"/>
-        <path d="M 880 40 L 820 90 L 760 140 L 710 190 L 660 230 L 610 280 L 560 330 L 520 380 L 470 420 L 420 470 L 370 520 L 330 560 L 280 600 L 220 660"/>
-        <path d="M 860 740 L 780 780 L 720 820 L 660 860 L 610 900 L 540 930 L 480 960 L 420 980"/>
-        <!-- branches -->
-        <path d="M 660 230 L 680 260 L 700 290"/>
-        <path d="M 520 620 L 500 660 L 480 700"/>
-      </g>
-
-      <!-- Bolt set C (faster crackle details) -->
-      <g stroke="url(#boltStroke)" stroke-width="2.2" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick3 2.2s infinite;">
-        <path d="M 120 300 L 180 340 L 230 380 L 290 430 L 340 470 L 390 520 L 450 560 L 500 590 L 560 640 L 610 670 L 660 710 L 710 740 L 760 770"/>
-        <path d="M 140 880 L 200 840 L 260 800 L 320 760 L 370 720 L 430 680 L 480 640 L 530 600 L 600 560 L 660 520"/>
-        <path d="M 220 120 L 280 170 L 340 210 L 400 260 L 460 300 L 520 340 L 580 400 L 640 440"/>
+        <path d="M 50 120 L 220 280 L 380 470 L 560 650 L 700 760 L 780 820"/>
       </g>
     </svg>
   </div>
@@ -181,8 +149,6 @@ footer img{margin-top:10px; width:220px; height:auto; opacity:0.95; border-radiu
     <div class="grid">
       <section class="card">
         <h2>Inputs</h2>
-
-        <!-- Original placement -->
         <label for="volume">Daily Volume $</label>
         <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
 
@@ -237,57 +203,29 @@ footer img{margin-top:10px; width:220px; height:auto; opacity:0.95; border-radiu
   </footer>
 
   <script>
-  const INTERNAL_HOLDER_RATE = 0.0455;
-
-  const els = {
-    volume: document.getElementById('volume'),
-    holdings: document.getElementById('holdings'),
-    supply: document.getElementById('supply'),
-    ownership: document.getElementById('ownership'),
-    yourRewards: document.getElementById('yourRewards'),
-    rewardsTitle: document.getElementById('rewardsTitle'),
-    periodRewardsLabel: document.getElementById('periodRewardsLabel'),
-    btnDaily: document.getElementById('btnDaily'),
-    btnWeekly: document.getElementById('btnWeekly'),
-    btnMonthly: document.getElementById('btnMonthly'),
-    btnAnnual: document.getElementById('btnAnnual'),
-    calcBtn: document.getElementById('calcBtn'),
-    calcBtnSticky: document.getElementById('calcBtnSticky'),
-  };
-
-  els.supply.value = "860958483.734133327";
-
-  const PERIODS = {
-    Daily:{mult:1,title:"Your estimated Daily Rewards $ of XRP",label:"Your Rewards $ of XRP (per day)"},
+  const INTERNAL_HOLDER_RATE=0.0455;
+  const els={volume:volume,holdings:holdings,supply:supply,ownership:ownership,yourRewards:yourRewards,
+    rewardsTitle:rewardsTitle,periodRewardsLabel:periodRewardsLabel,btnDaily:btnDaily,btnWeekly:btnWeekly,
+    btnMonthly:btnMonthly,btnAnnual:btnAnnual,calcBtn:calcBtn,calcBtnSticky:calcBtnSticky};
+  els.supply.value="860958483.734133327";
+  const PERIODS={Daily:{mult:1,title:"Your estimated Daily Rewards $ of XRP",label:"Your Rewards $ of XRP (per day)"},
     Weekly:{mult:7,title:"Your estimated Weekly Rewards $ of XRP",label:"Your Rewards $ of XRP (per week)"},
     Monthly:{mult:30,title:"Your estimated Monthly Rewards $ of XRP",label:"Your Rewards $ of XRP (per month)"},
-    Annual:{mult:365,title:"Your estimated Annual Rewards $ of XRP",label:"Your Rewards $ of XRP (per year)"}
-  };
+    Annual:{mult:365,title:"Your estimated Annual Rewards $ of XRP",label:"Your Rewards $ of XRP (per year)"}};
   let currentPeriod="Daily";
-
   function fmtNum(n,d=2){return isFinite(n)?Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d}):"0.00";}
   function fmtPct(x,d=6){return isFinite(x)?(x*100).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d})+"%":"0.000000%";}
-  function setPeriod(name){
-    currentPeriod=name;
-    const c=PERIODS[name];
-    els.rewardsTitle.textContent=c.title;
-    els.periodRewardsLabel.textContent=c.label;
+  function setPeriod(name){currentPeriod=name;const c=PERIODS[name];
+    els.rewardsTitle.textContent=c.title;els.periodRewardsLabel.textContent=c.label;
     els.btnDaily.setAttribute('aria-pressed',name==="Daily");
     els.btnWeekly.setAttribute('aria-pressed',name==="Weekly");
     els.btnMonthly.setAttribute('aria-pressed',name==="Monthly");
-    els.btnAnnual.setAttribute('aria-pressed',name==="Annual");
-  }
+    els.btnAnnual.setAttribute('aria-pressed',name==="Annual");}
   function recalc(){
-    const v=parseFloat(els.volume.value)||0;
-    const h=parseFloat(els.holdings.value)||0;
-    const s=parseFloat(els.supply.value)||0;
-    const own=s>0?(h/s):0;
-    const mult=PERIODS[currentPeriod].mult;
+    const v=parseFloat(els.volume.value)||0,h=parseFloat(els.holdings.value)||0,s=parseFloat(els.supply.value)||0;
+    const own=s>0?(h/s):0;const mult=PERIODS[currentPeriod].mult;
     const rew=v*INTERNAL_HOLDER_RATE*own*mult;
-    els.ownership.textContent=fmtPct(own,6);
-    els.yourRewards.textContent=fmtNum(rew,2);
-  }
-
+    els.ownership.textContent=fmtPct(own,6);els.yourRewards.textContent=fmtNum(rew,2);}
   els.calcBtn.addEventListener('click',recalc);
   els.calcBtnSticky.addEventListener('click',recalc);
   els.btnDaily.addEventListener('click',()=>{setPeriod('Daily');recalc();});
