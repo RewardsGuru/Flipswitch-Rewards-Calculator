@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$FSWITCH Rewards Calculator</title>
 
-  <!-- Icons / Favicon -->
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="fswitch_icon_512.png" sizes="512x512">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#0a0c12">
 
-  <!-- Open Graph / Twitter Cards -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="$FSWITCH Rewards Calculator">
   <meta property="og:description" content="Estimate your Daily / Weekly / Monthly / Annual $XRP rewards.">
@@ -26,217 +24,121 @@
   <meta name="twitter:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
 
   <style>
-    /* ===== XRP FLIPSWITCH THEME (dark rock + lava + lightning) ===== */
     :root{
-      --bg-0:#0a0c12;      /* near-black rock */
-      --bg-1:#121722;      /* deep slate */
-      --panel:#0f131d;     /* cards */
-      --edge:#1f2633;      /* borders */
-
+      --bg:#0b0f1c;
+      --card:#101426;
       --text:#e9ecf2;
       --muted:#a8b0c2;
-
-      --fire-1:#ff5a00;    /* rim orange */
-      --fire-2:#ff7a1a;    /* core orange */
-      --fire-3:#ffd08a;    /* hot highlight */
-      --bolt:#67c6ff;      /* electric blue */
+      --accent:#67c6ff;
+      --fire1:#ff5a00;
+      --fire2:#ff7a1a;
+      --fire3:#ffd08a;
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
       color:var(--text);
       line-height:1.45;
-      padding-bottom:84px;
-      background:linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      background:
+        radial-gradient(90vmax 70vmax at 50% 12%, rgba(103,198,255,.09), transparent 60%),
+        radial-gradient(90vmax 70vmax at 50% 88%, rgba(103,198,255,.06), transparent 60%),
+        linear-gradient(180deg,#090d18,var(--bg) 220px);
       background-attachment:fixed;
+      position:relative;
+      overflow-x:hidden;
+      padding-bottom:84px;
     }
 
-    /* === Animated Dark-Blue Lightning Background ===
-       We use a fixed layer + two pseudo-layers for moving energy + filaments.
-    */
-    .bg-energized{
-      position:fixed; inset:0; z-index:-2; pointer-events:none;
-      background:
-        radial-gradient(90vmax 70vmax at 50% 10%, rgba(103,198,255,.08), transparent 60%),
-        radial-gradient(90vmax 70vmax at 50% 90%, rgba(103,198,255,.05), transparent 60%),
-        linear-gradient(180deg, #0a0c12 0%, #101522 60%, #0d1220 100%);
-    }
-    .bg-energized::before,
-    .bg-energized::after{
-      content:""; position:absolute; inset:-10%; pointer-events:none;
-    }
-    /* Nebula/aurora “storm energy” blobs (slow drift) */
-    .bg-energized::before{
-      z-index:-1;
-      background:
-        radial-gradient(60vmax 40vmax at 20% 30%, rgba(103,198,255,.14), transparent 60%),
-        radial-gradient(55vmax 35vmax at 80% 70%, rgba(72,150,235,.12), transparent 65%),
-        radial-gradient(45vmax 30vmax at 40% 80%, rgba(140,200,255,.10), transparent 70%);
-      filter: blur(10px);
-      animation: stormDrift 26s ease-in-out infinite alternate;
-    }
-    /* Fine lightning filaments (very subtle, continuous slide) */
-    .bg-energized::after{
-      z-index:-1;
-      opacity:.22;
-      background:
-        repeating-linear-gradient(115deg,
-          rgba(102,197,255,.12) 0 2px, transparent 2px 16px),
-        repeating-linear-gradient(245deg,
-          rgba(86,170,255,.08) 0 1px, transparent 1px 14px);
-      mix-blend-mode: screen;
-      animation: boltsSlide 12s linear infinite;
-    }
-    @keyframes stormDrift{
-      0%   { transform: translate3d(-2%, -1%, 0) scale(1);   opacity:.95; }
-      50%  { transform: translate3d(2%, 1%, 0)     scale(1.02); opacity:.9; }
-      100% { transform: translate3d(-1%, 2%, 0)    scale(1.03); opacity:.95; }
-    }
-    @keyframes boltsSlide{
-      0%   { background-position: 0 0, 0 0; }
-      100% { background-position: 220px 280px, -200px 240px; }
+    /* === Lightning Overlay === */
+    body::before{
+      content:"";
+      position:fixed; inset:0; z-index:-1; pointer-events:none;
+      opacity:.30; mix-blend-mode:screen;
+      background-size:cover;
+      background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='none'>\
+<defs>\
+<filter id='zap'>\
+<feTurbulence type='fractalNoise' baseFrequency='0.010' numOctaves='3' seed='7'>\
+<animate attributeName='baseFrequency' values='0.010;0.013;0.009;0.012;0.010' dur='6s' repeatCount='indefinite'/>\
+</feTurbulence>\
+<feColorMatrix type='matrix' values='0 0 0 0 0   0 0 0 0 0.7   0 0 0 0 1   0 0 0 12 -5'/>\
+<feGaussianBlur stdDeviation='0.6'/>\
+</filter>\
+<linearGradient id='blue' x1='0' y1='0' x2='1' y2='1'>\
+<stop offset='0%' stop-color='#86d4ff'/>\
+<stop offset='100%' stop-color='#3aa7ff'/>\
+</linearGradient>\
+</defs>\
+<rect width='100%' height='100%' fill='url(#blue)' filter='url(#zap)'/>\
+</svg>");
     }
 
-    header{padding:16px 16px 8px; text-align:center}
-    header h1{
-      margin:.6rem 0 0; font-size:1.6rem; font-weight:900; letter-spacing:.3px;
-      text-shadow:0 2px 12px rgba(103,198,255,.15), 0 0 10px rgba(255,90,0,.08)
-    }
-    header p{margin:.25rem 0; color:var(--muted); font-size:.95rem}
-    .banner{
-      width:100%; height:auto; max-height:360px; display:block; object-fit:cover;
-      border-radius:12px; margin:8px auto; box-shadow:0 10px 28px rgba(0,0,0,.45);
+    @media (prefers-reduced-motion: reduce){
+      body::before{background-image:none !important;}
     }
 
-    .wrap{max-width:980px; margin:0 auto; padding:8px 16px 32px}
-    .grid{display:grid; grid-template-columns:1fr; gap:16px}
-    @media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
+    header{text-align:center;padding:16px 16px 8px;}
+    header h1{margin:.6rem 0 0;font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-shadow:0 2px 12px rgba(103,198,255,.15),0 0 10px rgba(255,90,0,.08)}
+    header p{margin:.25rem 0;color:var(--muted);font-size:.95rem}
+    .banner{width:100%;max-height:360px;display:block;object-fit:cover;border-radius:12px;margin:8px auto;box-shadow:0 10px 28px rgba(0,0,0,.45)}
 
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.08)), var(--panel);
-      border:1px solid var(--edge);
-      border-radius:16px; padding:16px;
-      box-shadow:0 10px 28px rgba(0,0,0,.45);
-      overflow:visible; /* ensure glows aren’t clipped */
-    }
-    .card h2{margin:.1rem 0 .6rem; font-size:1.05rem}
+    .wrap{max-width:980px;margin:0 auto;padding:8px 16px 32px}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media (min-width:880px){.grid{grid-template-columns:1fr 1fr}}
 
-    label{display:block; font-weight:700; margin:.55rem 0 .3rem; color:var(--muted)}
+    .card{background:var(--card);border:1px solid #1f2743;border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+    .card h2{margin:.1rem 0 .6rem;font-size:1.05rem}
 
-    /* Field wrapper so the whole block glows */
-    .field{
-      position:relative; border-radius:14px; transition:box-shadow .25s ease;
-      display:flex; flex-direction:column; margin-bottom:12px; min-width:0;
-    }
-    .field:focus-within{
-      box-shadow:
-        0 0 0 2px rgba(255,122,26,.70),
-        0 0 28px 6px rgba(255,90,0,.35),
-        inset 0 0 14px rgba(255,208,138,.12);
-    }
+    label{display:block;font-weight:700;margin:.55rem 0 .3rem;color:var(--muted)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:560px){.row{grid-template-columns:1fr}}
 
     input{
-      width:100%; padding:12px 14px; border-radius:12px;
-      border:1px solid var(--edge);
-      background:#0c111a; color:var(--text); font-size:1rem;
+      width:100%;padding:12px 14px;border-radius:12px;
+      border:1px solid #1f2743;background:#0c111a;color:var(--text);font-size:1rem;
       outline:none;
-      transition:border-color .2s ease, box-shadow .25s ease, background .25s ease;
+      transition:border-color .2s ease,box-shadow .25s ease,background .25s ease;
     }
     input:hover{border-color:#2c3446}
     input:focus{
-      border-color:transparent;
-      background:#0b1019;
+      border-color:transparent;background:#0b1019;
       box-shadow:
-        0 0 0 2px rgba(255,122,26,.75),
-        0 0 24px 8px rgba(255,90,0,.35),
+        0 0 0 2px rgba(255,122,26,.80),
+        0 0 22px 10px rgba(255,90,0,.30),
         inset 0 0 12px rgba(255,208,138,.18);
     }
 
-    /* Two-up row that stacks on phones (fixes overlapping) */
-    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media (max-width:560px){
-      .row{ grid-template-columns:1fr; }  /* stack vertically */
-    }
+    .help{font-size:.9rem;color:var(--muted)}
+    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+    .kpi .box{background:#0e141c;border:1px solid #1f2a33;border-radius:12px;padding:12px;box-shadow:inset 0 0 24px rgba(103,198,255,.05)}
+    .box h3{margin:0;font-size:.9rem;color:var(--muted);font-weight:700}
+    .val{font-weight:900;font-size:1.25rem;margin-top:6px;text-shadow:0 0 10px rgba(103,198,255,.22)}
 
-    .help{font-size:.9rem; color:var(--muted)}
+    .seg{display:inline-flex;gap:6px;padding:6px;background:#0b1018;border:1px solid #1f2743;border-radius:999px;margin:8px 0 4px;box-shadow:inset 0 0 18px rgba(255,90,0,.06)}
+    .seg button{appearance:none;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:800;font-size:.95rem}
+    .seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;border-color:#ff6a10;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 6px 16px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset}
 
-    .kpi{
-      display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px
-    }
-    .kpi .box{
-      background:#0e141c; border:1px solid #1f2a33; border-radius:12px; padding:12px;
-      box-shadow:inset 0 0 24px rgba(103,198,255,.05);
-    }
-    .box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:700}
-    .val{font-weight:900; font-size:1.25rem; margin-top:6px; text-shadow:0 0 10px rgba(103,198,255,.22)}
-
-    .seg{
-      display:inline-flex; gap:6px; padding:6px;
-      background:#0b1018; border:1px solid var(--edge); border-radius:999px; margin:8px 0 4px;
-      box-shadow:inset 0 0 18px rgba(255,90,0,.06);
-    }
-    .seg button{
-      appearance:none; border:1px solid transparent; background:transparent; color:var(--text);
-      padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:800; font-size:.95rem;
-    }
-    .seg button[aria-pressed="true"]{
-      background:linear-gradient(180deg, var(--fire-2), var(--fire-1));
-      color:#190c04; border-color:#ff6a10; text-shadow:0 1px 0 rgba(255,240,210,.6);
-      box-shadow:0 6px 16px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset;
-    }
-
-    .actions{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-
-    .btn{
-      appearance:none; border:1px solid #ff6a10;
-      background:
-        radial-gradient(120% 160% at 50% 0%, rgba(255,208,138,.35), transparent 45%),
-        linear-gradient(180deg, var(--fire-2), var(--fire-1));
-      color:#190c04;
-      padding:12px 16px; border-radius:14px; cursor:pointer; font-weight:900; font-size:1rem;
-      text-shadow:0 1px 0 rgba(255,240,210,.6);
-      box-shadow:0 10px 24px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset;
-      transition:transform .08s ease, box-shadow .2s ease, filter .2s ease;
-    }
+    .actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{appearance:none;border:1px solid #ff6a10;background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:900;font-size:1rem;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 10px 24px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset;transition:transform .08s ease,box-shadow .2s ease,filter .2s ease}
     .btn:hover{filter:saturate(1.05)}
-    .btn:active{transform:translateY(1px); box-shadow:0 8px 18px rgba(255,90,0,.28), 0 0 0 2px rgba(255,122,26,.55) inset}
-    .btn.primary{ /* same visuals as .btn for clarity */ }
+    .btn:active{transform:translateY(1px);box-shadow:0 8px 18px rgba(255,90,0,.28),0 0 0 2px rgba(255,122,26,.55) inset}
+    .btn.primary{background:linear-gradient(180deg,var(--fire2),var(--fire1))}
 
-    .sticky-bar{
-      position:fixed; left:0; right:0; bottom:0; z-index:1000;
-      background:rgba(10,14,22,.92); backdrop-filter: blur(6px);
-      border-top:1px solid var(--edge);
-      padding:10px 12px;
-      display:flex; gap:10px; justify-content:center; align-items:center;
-    }
-    .sticky-bar .btn{flex:1; max-width:520px}
-    @media (min-width:880px){
-      .sticky-bar{display:none}
-      body{padding-bottom:0}
-    }
+    .sticky-bar{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:rgba(10,14,22,.92);backdrop-filter:blur(6px);border-top:1px solid #1f2743;padding:10px 12px;display:flex;gap:10px;justify-content:center;align-items:center}
+    .sticky-bar .btn{flex:1;max-width:520px}
+    @media (min-width:880px){.sticky-bar{display:none}body{padding-bottom:0}}
 
-    footer{opacity:.9; text-align:center; padding:30px 10px 40px; color:var(--muted); font-size:.85rem}
-    footer img{margin-top:10px;width:220px;height:auto;opacity:0.95;border-radius:6px;}
+    footer{opacity:.9;text-align:center;padding:30px 10px 40px;color:var(--muted);font-size:.85rem}
+    footer img{margin-top:10px;width:220px;height:auto;opacity:0.95;border-radius:6px}
 
-    /* iOS: avoid zoom on focus & keep layout stable */
-    @supports (-webkit-touch-callout: none){
-      input{ font-size:16px; }
-    }
-
-    /* Accessibility: respect reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .bg-energized::before, .bg-energized::after{ animation: none !important; }
-      *{ transition:none !important; }
-    }
+    @supports (-webkit-touch-callout: none){input{font-size:16px}}
   </style>
 </head>
-<body>
-  <!-- Animated dark-blue lightning layer -->
-  <div class="bg-energized" aria-hidden="true"></div>
 
+<body>
   <header>
     <img src="fswitch_banner_1500x500%201.jpg" alt="$FSWITCH banner" class="banner" onerror="this.style.display='none'">
     <h1>$FSWITCH Rewards Calculator</h1>
@@ -248,17 +150,15 @@
       <section class="card">
         <h2>Inputs</h2>
 
-        <div class="field">
-          <label for="volume">Daily Volume $</label>
-          <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
-        </div>
+        <label for="volume">Daily Volume $</label>
+        <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
 
         <div class="row">
-          <div class="field">
+          <div>
             <label for="holdings">Your Holdings (tokens)</label>
             <input id="holdings" type="number" min="0" step="0.000000001" placeholder="e.g., 1_000_000" />
           </div>
-          <div class="field">
+          <div>
             <label for="supply">Total Current Supply</label>
             <input id="supply" type="number" min="0" step="0.000000001" />
             <div class="help">Editable (prefilled automatically)</div>
@@ -268,7 +168,7 @@
         <div class="actions">
           <button id="calcBtn" class="btn primary">Calculate My Rewards</button>
           <div class="seg" role="tablist" aria-label="Projection period">
-            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
+            <button id="btnDaily" role="tab" aria-pressed="true">Daily</button>
             <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
             <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
             <button id="btnAnnual" role="tab" aria-pressed="false">Annual</button>
@@ -305,7 +205,6 @@
 
   <script>
     const INTERNAL_HOLDER_RATE = 0.0455;
-
     const els = {
       volume: document.getElementById('volume'),
       holdings: document.getElementById('holdings'),
@@ -322,56 +221,44 @@
       calcBtnSticky: document.getElementById('calcBtnSticky'),
     };
 
-    // Prefill supply (editable)
     els.supply.value = "860958483.734133327";
-
     const PERIODS = {
-      Daily:   {mult: 1,   title: "Your estimated Daily Rewards $ of XRP",   label: "Your Rewards $ of XRP (per day)"},
-      Weekly:  {mult: 7,   title: "Your estimated Weekly Rewards $ of XRP",  label: "Your Rewards $ of XRP (per week)"},
-      Monthly: {mult: 30,  title: "Your estimated Monthly Rewards $ of XRP", label: "Your Rewards $ of XRP (per month)"},
-      Annual:  {mult: 365, title: "Your estimated Annual Rewards $ of XRP",  label: "Your Rewards $ of XRP (per year)"}
+      Daily:{mult:1,title:"Your estimated Daily Rewards $ of XRP",label:"Your Rewards $ of XRP (per day)"},
+      Weekly:{mult:7,title:"Your estimated Weekly Rewards $ of XRP",label:"Your Rewards $ of XRP (per week)"},
+      Monthly:{mult:30,title:"Your estimated Monthly Rewards $ of XRP",label:"Your Rewards $ of XRP (per month)"},
+      Annual:{mult:365,title:"Your estimated Annual Rewards $ of XRP",label:"Your Rewards $ of XRP (per year)"}
     };
-    let currentPeriod = "Daily";
+    let currentPeriod="Daily";
 
-    function fmtNum(n, decimals=2){
-      if (!isFinite(n)) return "0.00";
-      return Number(n).toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals });
-    }
-    function fmtPct(x, decimals=6){
-      if (!isFinite(x)) return "0.000000%";
-      return (x*100).toLocaleString(undefined, { maximumFractionDigits: decimals, minimumFractionDigits: decimals }) + "%";
-    }
-
+    function fmtNum(n,d=2){return isFinite(n)?Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d}):"0.00";}
+    function fmtPct(x,d=6){return isFinite(x)?(x*100).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d})+"%":"0.000000%";}
     function setPeriod(name){
-      currentPeriod = name;
-      const conf = PERIODS[name];
-      els.rewardsTitle.textContent = conf.title;
-      els.periodRewardsLabel.textContent = conf.label;
-      els.btnDaily.setAttribute('aria-pressed', String(name==="Daily"));
-      els.btnWeekly.setAttribute('aria-pressed', String(name==="Weekly"));
-      els.btnMonthly.setAttribute('aria-pressed', String(name==="Monthly"));
-      els.btnAnnual.setAttribute('aria-pressed', String(name==="Annual"));
+      currentPeriod=name;
+      const c=PERIODS[name];
+      els.rewardsTitle.textContent=c.title;
+      els.periodRewardsLabel.textContent=c.label;
+      els.btnDaily.setAttribute('aria-pressed',name==="Daily");
+      els.btnWeekly.setAttribute('aria-pressed',name==="Weekly");
+      els.btnMonthly.setAttribute('aria-pressed',name==="Monthly");
+      els.btnAnnual.setAttribute('aria-pressed',name==="Annual");
     }
-
     function recalc(){
-      const volume = parseFloat(els.volume.value) || 0;
-      const holdings = parseFloat(els.holdings.value) || 0;
-      const supply = parseFloat(els.supply.value) || 0;
-
-      const ownership = supply > 0 ? (holdings / supply) : 0;
-      const periodMult = PERIODS[currentPeriod].mult;
-      const yourRewards = volume * INTERNAL_HOLDER_RATE * ownership * periodMult;
-
-      els.ownership.textContent = fmtPct(ownership, 6);
-      els.yourRewards.textContent = fmtNum(yourRewards, 2);
+      const v=parseFloat(els.volume.value)||0;
+      const h=parseFloat(els.holdings.value)||0;
+      const s=parseFloat(els.supply.value)||0;
+      const own=s>0?(h/s):0;
+      const mult=PERIODS[currentPeriod].mult;
+      const rew=v*INTERNAL_HOLDER_RATE*own*mult;
+      els.ownership.textContent=fmtPct(own,6);
+      els.yourRewards.textContent=fmtNum(rew,2);
     }
 
-    els.calcBtn.addEventListener('click', recalc);
-    els.calcBtnSticky.addEventListener('click', recalc);
-    els.btnDaily.addEventListener('click', () => { setPeriod('Daily'); recalc(); });
-    els.btnWeekly.addEventListener('click', () => { setPeriod('Weekly'); recalc(); });
-    els.btnMonthly.addEventListener('click', () => { setPeriod('Monthly'); recalc(); });
-    els.btnAnnual.addEventListener('click', () => { setPeriod('Annual'); recalc(); });
+    els.calcBtn.addEventListener('click',recalc);
+    els.calcBtnSticky.addEventListener('click',recalc);
+    els.btnDaily.addEventListener('click',()=>{setPeriod('Daily');recalc();});
+    els.btnWeekly.addEventListener('click',()=>{setPeriod('Weekly');recalc();});
+    els.btnMonthly.addEventListener('click',()=>{setPeriod('Monthly');recalc();});
+    els.btnAnnual.addEventListener('click',()=>{setPeriod('Annual');recalc();});
   </script>
 </body>
 </html>
