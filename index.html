@@ -25,120 +25,138 @@
 
   <style>
     :root{
-      --bg:#0b0f1c;
-      --card:#101426;
-      --text:#e9ecf2;
-      --muted:#a8b0c2;
-      --accent:#67c6ff;
-      --fire1:#ff5a00;
-      --fire2:#ff7a1a;
-      --fire3:#ffd08a;
+      --bg:#0b0f1c; --card:#101426; --text:#e9ecf2; --muted:#a8b0c2; --accent:#67c6ff;
+      --fire1:#ff5a00; --fire2:#ff7a1a; --fire3:#ffd08a;
     }
-
     *{box-sizing:border-box}
+
+    /* Base background (dark) */
+    html,body{height:100%}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
-      color:var(--text);
-      line-height:1.45;
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      color:var(--text); line-height:1.45; padding-bottom:84px;
       background:
         radial-gradient(90vmax 70vmax at 50% 12%, rgba(103,198,255,.09), transparent 60%),
         radial-gradient(90vmax 70vmax at 50% 88%, rgba(103,198,255,.06), transparent 60%),
         linear-gradient(180deg,#090d18,var(--bg) 220px);
       background-attachment:fixed;
-      position:relative;
       overflow-x:hidden;
-      padding-bottom:84px;
     }
 
-    /* === Lightning Overlay === */
-    body::before{
-      content:"";
-      position:fixed; inset:0; z-index:-1; pointer-events:none;
-      opacity:.30; mix-blend-mode:screen;
-      background-size:cover;
-      background-image:url("data:image/svg+xml;utf8,\
+    /* ---------- LIGHTNING LAYER (visible on iOS/Android/desktop) ---------- */
+    .fx-lightning{
+      position:fixed; inset:0; z-index:0; pointer-events:none; mix-blend-mode:screen;
+      /* Two stacked animated SVG noise layers for forked, flickering veins */
+      background-image:
+        url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='none'>\
 <defs>\
-<filter id='zap'>\
-<feTurbulence type='fractalNoise' baseFrequency='0.010' numOctaves='3' seed='7'>\
+<filter id='zapA'>\
+<feTurbulence type='fractalNoise' baseFrequency='0.010' numOctaves='3' seed='5'>\
 <animate attributeName='baseFrequency' values='0.010;0.013;0.009;0.012;0.010' dur='6s' repeatCount='indefinite'/>\
 </feTurbulence>\
-<feColorMatrix type='matrix' values='0 0 0 0 0   0 0 0 0 0.7   0 0 0 0 1   0 0 0 12 -5'/>\
+<feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0.7  0 0 0 0 1  0 0 0 12 -5'/>\
 <feGaussianBlur stdDeviation='0.6'/>\
 </filter>\
-<linearGradient id='blue' x1='0' y1='0' x2='1' y2='1'>\
-<stop offset='0%' stop-color='#86d4ff'/>\
-<stop offset='100%' stop-color='#3aa7ff'/>\
-</linearGradient>\
+<linearGradient id='gA' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#9fe0ff'/><stop offset='100%' stop-color='#3aa7ff'/></linearGradient>\
 </defs>\
-<rect width='100%' height='100%' fill='url(#blue)' filter='url(#zap)'/>\
+<rect width='100%' height='100%' fill='url(#gA)' filter='url(#zapA)'/>\
+</svg>"),
+        url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='none'>\
+<defs>\
+<filter id='zapB'>\
+<feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' seed='11'>\
+<animate attributeName='baseFrequency' values='0.012;0.015;0.010;0.014;0.012' dur='7s' repeatCount='indefinite'/>\
+</feTurbulence>\
+<feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0.8  0 0 0 0 1  0 0 0 10 -4.5'/>\
+<feGaussianBlur stdDeviation='0.8'/>\
+</filter>\
+<linearGradient id='gB' x1='1' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#86d4ff'/><stop offset='100%' stop-color='#2f99ff'/></linearGradient>\
+</defs>\
+<rect width='100%' height='100%' fill='url(#gB)' filter='url(#zapB)'/>\
 </svg>");
+      background-size:cover, cover;
+      background-position:center, center;
+      opacity:.48;  /* bump if you want stronger lightning */
+      animation: flickA 2.2s steps(2,end) infinite alternate, flickB 3s steps(3,end) infinite alternate;
     }
+    @keyframes flickA{ 0%{opacity:.42} 100%{opacity:.55} }
+    @keyframes flickB{ 0%{filter:brightness(1)} 100%{filter:brightness(1.12)} }
 
-    @media (prefers-reduced-motion: reduce){
-      body::before{background-image:none !important;}
-    }
+    /* Bring main content above lightning */
+    header, .wrap, .sticky-bar, footer{ position:relative; z-index:1 }
 
-    header{text-align:center;padding:16px 16px 8px;}
-    header h1{margin:.6rem 0 0;font-size:1.6rem;font-weight:900;letter-spacing:.3px;text-shadow:0 2px 12px rgba(103,198,255,.15),0 0 10px rgba(255,90,0,.08)}
-    header p{margin:.25rem 0;color:var(--muted);font-size:.95rem}
-    .banner{width:100%;max-height:360px;display:block;object-fit:cover;border-radius:12px;margin:8px auto;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+    header{padding:16px 16px 8px; text-align:center}
+    header h1{margin:.6rem 0 0; font-size:1.6rem; font-weight:900; letter-spacing:.3px;
+      text-shadow:0 2px 12px rgba(103,198,255,.15), 0 0 10px rgba(255,90,0,.08)}
+    header p{margin:.25rem 0; color:var(--muted); font-size:.95rem}
+    .banner{width:100%; max-height:360px; display:block; object-fit:cover; border-radius:12px; margin:8px auto; box-shadow:0 10px 28px rgba(0,0,0,.45)}
 
-    .wrap{max-width:980px;margin:0 auto;padding:8px 16px 32px}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:880px){.grid{grid-template-columns:1fr 1fr}}
+    .wrap{max-width:980px; margin:0 auto; padding:8px 16px 32px}
+    .grid{display:grid; grid-template-columns:1fr; gap:16px}
+    @media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
 
-    .card{background:var(--card);border:1px solid #1f2743;border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.45)}
-    .card h2{margin:.1rem 0 .6rem;font-size:1.05rem}
+    .card{background:var(--card); border:1px solid #1f2743; border-radius:16px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.45)}
+    .card h2{margin:.1rem 0 .6rem; font-size:1.05rem}
 
-    label{display:block;font-weight:700;margin:.55rem 0 .3rem;color:var(--muted)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:560px){.row{grid-template-columns:1fr}}
+    label{display:block; font-weight:700; margin:.55rem 0 .3rem; color:var(--muted)}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width:560px){ .row{ grid-template-columns:1fr } }
 
+    /* Single (not double) glow on the inputs */
     input{
-      width:100%;padding:12px 14px;border-radius:12px;
-      border:1px solid #1f2743;background:#0c111a;color:var(--text);font-size:1rem;
-      outline:none;
-      transition:border-color .2s ease,box-shadow .25s ease,background .25s ease;
+      width:100%; padding:12px 14px; border-radius:12px;
+      border:1px solid #1f2743; background:#0c111a; color:var(--text); font-size:1rem;
+      outline:none; transition:border-color .2s ease, box-shadow .25s ease, background .25s ease;
     }
-    input:hover{border-color:#2c3446}
+    input:hover{ border-color:#2c3446 }
     input:focus{
-      border-color:transparent;background:#0b1019;
+      border-color:transparent; background:#0b1019;
       box-shadow:
         0 0 0 2px rgba(255,122,26,.80),
         0 0 22px 10px rgba(255,90,0,.30),
         inset 0 0 12px rgba(255,208,138,.18);
     }
 
-    .help{font-size:.9rem;color:var(--muted)}
-    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
-    .kpi .box{background:#0e141c;border:1px solid #1f2a33;border-radius:12px;padding:12px;box-shadow:inset 0 0 24px rgba(103,198,255,.05)}
-    .box h3{margin:0;font-size:.9rem;color:var(--muted);font-weight:700}
-    .val{font-weight:900;font-size:1.25rem;margin-top:6px;text-shadow:0 0 10px rgba(103,198,255,.22)}
+    .help{font-size:.9rem; color:var(--muted)}
+    .kpi{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px}
+    .kpi .box{background:#0e141c; border:1px solid #1f2a33; border-radius:12px; padding:12px; box-shadow:inset 0 0 24px rgba(103,198,255,.05)}
+    .box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:700}
+    .val{font-weight:900; font-size:1.25rem; margin-top:6px; text-shadow:0 0 10px rgba(103,198,255,.22)}
 
-    .seg{display:inline-flex;gap:6px;padding:6px;background:#0b1018;border:1px solid #1f2743;border-radius:999px;margin:8px 0 4px;box-shadow:inset 0 0 18px rgba(255,90,0,.06)}
-    .seg button{appearance:none;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:800;font-size:.95rem}
-    .seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;border-color:#ff6a10;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 6px 16px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset}
+    .seg{display:inline-flex; gap:6px; padding:6px; background:#0b1018; border:1px solid #1f2743; border-radius:999px; margin:8px 0 4px; box-shadow:inset 0 0 18px rgba(255,90,0,.06)}
+    .seg button{appearance:none; border:1px solid transparent; background:transparent; color:var(--text); padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:800; font-size:.95rem}
+    .seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--fire2),var(--fire1)); color:#190c04; border-color:#ff6a10; text-shadow:0 1px 0 rgba(255,240,210,.6); box-shadow:0 6px 16px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset}
 
-    .actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .btn{appearance:none;border:1px solid #ff6a10;background:linear-gradient(180deg,var(--fire2),var(--fire1));color:#190c04;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:900;font-size:1rem;text-shadow:0 1px 0 rgba(255,240,210,.6);box-shadow:0 10px 24px rgba(255,90,0,.35),0 0 0 2px rgba(255,122,26,.35) inset;transition:transform .08s ease,box-shadow .2s ease,filter .2s ease}
+    .actions{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .btn{appearance:none; border:1px solid #ff6a10; background:linear-gradient(180deg,var(--fire2),var(--fire1)); color:#190c04; padding:12px 16px; border-radius:14px; cursor:pointer; font-weight:900; font-size:1rem; text-shadow:0 1px 0 rgba(255,240,210,.6); box-shadow:0 10px 24px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset; transition:transform .08s ease, box-shadow .2s ease, filter .2s ease}
     .btn:hover{filter:saturate(1.05)}
-    .btn:active{transform:translateY(1px);box-shadow:0 8px 18px rgba(255,90,0,.28),0 0 0 2px rgba(255,122,26,.55) inset}
+    .btn:active{transform:translateY(1px); box-shadow:0 8px 18px rgba(255,90,0,.28), 0 0 0 2px rgba(255,122,26,.55) inset}
     .btn.primary{background:linear-gradient(180deg,var(--fire2),var(--fire1))}
 
-    .sticky-bar{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:rgba(10,14,22,.92);backdrop-filter:blur(6px);border-top:1px solid #1f2743;padding:10px 12px;display:flex;gap:10px;justify-content:center;align-items:center}
-    .sticky-bar .btn{flex:1;max-width:520px}
-    @media (min-width:880px){.sticky-bar{display:none}body{padding-bottom:0}}
+    .sticky-bar{position:fixed; left:0; right:0; bottom:0; z-index:1; background:rgba(10,14,22,.92); backdrop-filter:blur(6px); border-top:1px solid #1f2743; padding:10px 12px; display:flex; gap:10px; justify-content:center; align-items:center}
+    .sticky-bar .btn{flex:1; max-width:520px}
+    @media (min-width:880px){ .sticky-bar{display:none} body{padding-bottom:0} }
 
-    footer{opacity:.9;text-align:center;padding:30px 10px 40px;color:var(--muted);font-size:.85rem}
-    footer img{margin-top:10px;width:220px;height:auto;opacity:0.95;border-radius:6px}
+    footer{opacity:.9; text-align:center; padding:30px 10px 40px; color:var(--muted); font-size:.85rem}
+    footer img{margin-top:10px; width:220px; height:auto; opacity:0.95; border-radius:6px}
 
-    @supports (-webkit-touch-callout: none){input{font-size:16px}}
+    /* iOS: avoid zoom on focus */
+    @supports (-webkit-touch-callout: none){ input{ font-size:16px } }
+
+    /* Motion preferences */
+    @media (prefers-reduced-motion: reduce){
+      .fx-lightning{ animation:none !important }
+      *{ transition:none !important }
+    }
   </style>
 </head>
 
 <body>
+  <!-- Visible lightning layer -->
+  <div class="fx-lightning" aria-hidden="true"></div>
+
   <header>
     <img src="fswitch_banner_1500x500%201.jpg" alt="$FSWITCH banner" class="banner" onerror="this.style.display='none'">
     <h1>$FSWITCH Rewards Calculator</h1>
@@ -205,6 +223,7 @@
 
   <script>
     const INTERNAL_HOLDER_RATE = 0.0455;
+
     const els = {
       volume: document.getElementById('volume'),
       holdings: document.getElementById('holdings'),
@@ -222,6 +241,7 @@
     };
 
     els.supply.value = "860958483.734133327";
+
     const PERIODS = {
       Daily:{mult:1,title:"Your estimated Daily Rewards $ of XRP",label:"Your Rewards $ of XRP (per day)"},
       Weekly:{mult:7,title:"Your estimated Weekly Rewards $ of XRP",label:"Your Rewards $ of XRP (per week)"},
