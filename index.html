@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$FSWITCH Rewards Calculator</title>
 
+  <!-- Icons / Favicon -->
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="fswitch_icon_512.png" sizes="512x512">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#0a0c12">
 
+  <!-- Open Graph / Twitter Cards -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="$FSWITCH Rewards Calculator">
   <meta property="og:description" content="Estimate your Daily / Weekly / Monthly / Annual $XRP rewards.">
@@ -24,67 +26,38 @@
   <meta name="twitter:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
 
   <style>
+    /* ===== Core theme (dark + lava accents) ===== */
     :root{
       --bg:#0b0f1c; --card:#101426; --text:#e9ecf2; --muted:#a8b0c2; --accent:#67c6ff;
       --fire1:#ff5a00; --fire2:#ff7a1a; --fire3:#ffd08a;
     }
     *{box-sizing:border-box}
-
-    /* Base background (dark) */
     html,body{height:100%}
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
       color:var(--text); line-height:1.45; padding-bottom:84px;
       background:
-        radial-gradient(90vmax 70vmax at 50% 12%, rgba(103,198,255,.09), transparent 60%),
+        radial-gradient(90vmax 70vmax at 50% 12%, rgba(103,198,255,.10), transparent 60%),
         radial-gradient(90vmax 70vmax at 50% 88%, rgba(103,198,255,.06), transparent 60%),
         linear-gradient(180deg,#090d18,var(--bg) 220px);
       background-attachment:fixed;
       overflow-x:hidden;
     }
 
-    /* ---------- LIGHTNING LAYER (visible on iOS/Android/desktop) ---------- */
-    .fx-lightning{
+    /* ===== VISIBLE LIGHTNING LAYER (inline SVG) ===== */
+    .fx-layer{
       position:fixed; inset:0; z-index:0; pointer-events:none; mix-blend-mode:screen;
-      /* Two stacked animated SVG noise layers for forked, flickering veins */
-      background-image:
-        url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='none'>\
-<defs>\
-<filter id='zapA'>\
-<feTurbulence type='fractalNoise' baseFrequency='0.010' numOctaves='3' seed='5'>\
-<animate attributeName='baseFrequency' values='0.010;0.013;0.009;0.012;0.010' dur='6s' repeatCount='indefinite'/>\
-</feTurbulence>\
-<feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0.7  0 0 0 0 1  0 0 0 12 -5'/>\
-<feGaussianBlur stdDeviation='0.6'/>\
-</filter>\
-<linearGradient id='gA' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#9fe0ff'/><stop offset='100%' stop-color='#3aa7ff'/></linearGradient>\
-</defs>\
-<rect width='100%' height='100%' fill='url(#gA)' filter='url(#zapA)'/>\
-</svg>"),
-        url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='none'>\
-<defs>\
-<filter id='zapB'>\
-<feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' seed='11'>\
-<animate attributeName='baseFrequency' values='0.012;0.015;0.010;0.014;0.012' dur='7s' repeatCount='indefinite'/>\
-</feTurbulence>\
-<feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0.8  0 0 0 0 1  0 0 0 10 -4.5'/>\
-<feGaussianBlur stdDeviation='0.8'/>\
-</filter>\
-<linearGradient id='gB' x1='1' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#86d4ff'/><stop offset='100%' stop-color='#2f99ff'/></linearGradient>\
-</defs>\
-<rect width='100%' height='100%' fill='url(#gB)' filter='url(#zapB)'/>\
-</svg>");
-      background-size:cover, cover;
-      background-position:center, center;
-      opacity:.48;  /* bump if you want stronger lightning */
-      animation: flickA 2.2s steps(2,end) infinite alternate, flickB 3s steps(3,end) infinite alternate;
     }
-    @keyframes flickA{ 0%{opacity:.42} 100%{opacity:.55} }
-    @keyframes flickB{ 0%{filter:brightness(1)} 100%{filter:brightness(1.12)} }
+    /* fallback tiny veins for extra pop */
+    .fx-veins{
+      position:fixed; inset:0; z-index:0; pointer-events:none; mix-blend-mode:screen;
+      background:
+        repeating-linear-gradient(115deg, rgba(102,197,255,.13) 0 2px, transparent 2px 16px),
+        repeating-linear-gradient(245deg, rgba(86,170,255,.10) 0 1px, transparent 1px 14px);
+      opacity:.25;
+    }
 
-    /* Bring main content above lightning */
+    /* content sits above effects */
     header, .wrap, .sticky-bar, footer{ position:relative; z-index:1 }
 
     header{padding:16px 16px 8px; text-align:center}
@@ -100,11 +73,12 @@
     .card{background:var(--card); border:1px solid #1f2743; border-radius:16px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.45)}
     .card h2{margin:.1rem 0 .6rem; font-size:1.05rem}
 
+    /* === LAYOUT: back to original positions === */
     label{display:block; font-weight:700; margin:.55rem 0 .3rem; color:var(--muted)}
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    @media (max-width:560px){ .row{ grid-template-columns:1fr } }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; } /* always side-by-side, like original */
+    /* (If you later want stacking on very small phones, tell me and I’ll add it back as an optional breakpoint.) */
 
-    /* Single (not double) glow on the inputs */
+    /* === Fiery single-glow on inputs (no wrapper glow) === */
     input{
       width:100%; padding:12px 14px; border-radius:12px;
       border:1px solid #1f2743; background:#0c111a; color:var(--text); font-size:1rem;
@@ -114,8 +88,8 @@
     input:focus{
       border-color:transparent; background:#0b1019;
       box-shadow:
-        0 0 0 2px rgba(255,122,26,.80),
-        0 0 22px 10px rgba(255,90,0,.30),
+        0 0 0 2px rgba(255,122,26,.85),
+        0 0 22px 10px rgba(255,90,0,.32),
         inset 0 0 12px rgba(255,208,138,.18);
     }
 
@@ -145,17 +119,46 @@
     /* iOS: avoid zoom on focus */
     @supports (-webkit-touch-callout: none){ input{ font-size:16px } }
 
-    /* Motion preferences */
+    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce){
-      .fx-lightning{ animation:none !important }
+      #fx-svg animate{ display:none }
+      .fx-veins{ display:none }
       *{ transition:none !important }
     }
   </style>
 </head>
 
 <body>
-  <!-- Visible lightning layer -->
-  <div class="fx-lightning" aria-hidden="true"></div>
+  <!-- TRUE lightning: inline SVG so it shows on iOS/Android/desktop -->
+  <svg id="fx-svg" class="fx-layer" viewBox="0 0 800 800" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <!-- Two turbulence fields for layered forks -->
+      <filter id="zapA">
+        <feTurbulence type="fractalNoise" baseFrequency="0.010" numOctaves="3" seed="7">
+          <animate attributeName="baseFrequency" values="0.010;0.013;0.009;0.012;0.010" dur="6s" repeatCount="indefinite"/>
+        </feTurbulence>
+        <!-- hard threshold to create veiny lightning -->
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0.8  0 0 0 0 1  0 0 0 12 -5"/>
+        <feGaussianBlur stdDeviation="0.7"/>
+      </filter>
+      <filter id="zapB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="11">
+          <animate attributeName="baseFrequency" values="0.012;0.015;0.010;0.014;0.012" dur="7s" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0.8  0 0 0 0 1  0 0 0 10 -4.5"/>
+        <feGaussianBlur stdDeviation="0.9"/>
+      </filter>
+      <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#9fe0ff"/><stop offset="100%" stop-color="#3aa7ff"/>
+      </linearGradient>
+      <linearGradient id="gB" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#86d4ff"/><stop offset="100%" stop-color="#2f99ff"/>
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#gA)" filter="url(#zapA)" opacity="0.55"/>
+    <rect width="100%" height="100%" fill="url(#gB)" filter="url(#zapB)" opacity="0.40"/>
+  </svg>
+  <div class="fx-veins" aria-hidden="true"></div>
 
   <header>
     <img src="fswitch_banner_1500x500%201.jpg" alt="$FSWITCH banner" class="banner" onerror="this.style.display='none'">
@@ -168,9 +171,11 @@
       <section class="card">
         <h2>Inputs</h2>
 
+        <!-- original positions: single field -->
         <label for="volume">Daily Volume $</label>
         <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
 
+        <!-- then two-up row exactly like your original -->
         <div class="row">
           <div>
             <label for="holdings">Your Holdings (tokens)</label>
@@ -186,7 +191,7 @@
         <div class="actions">
           <button id="calcBtn" class="btn primary">Calculate My Rewards</button>
           <div class="seg" role="tablist" aria-label="Projection period">
-            <button id="btnDaily" role="tab" aria-pressed="true">Daily</button>
+            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
             <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
             <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
             <button id="btnAnnual" role="tab" aria-pressed="false">Annual</button>
