@@ -14,6 +14,7 @@
       background:linear-gradient(180deg,#0a0d1a, var(--bg) 200px) fixed;
       color:var(--text);
       line-height:1.4;
+      padding-bottom:84px; /* space for mobile sticky bar */
     }
     header{padding:24px 16px 8px; text-align:center}
     header h1{margin:.2rem 0 0; font-size:1.5rem; font-weight:800; letter-spacing:.2px}
@@ -44,8 +45,6 @@
     }
     .box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:600}
     .val{font-weight:800; font-size:1.25rem; margin-top:4px}
-    footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
-    .note{font-size:.9rem; color:var(--muted); margin-top:8px}
     .seg{
       display:inline-flex; gap:6px; padding:6px; background:#0f1330; border:1px solid #2a2f58; border-radius:999px; margin:8px 0 4px;
     }
@@ -56,6 +55,32 @@
     .seg button[aria-pressed="true"]{
       background:var(--accent); color:#0a0f2a; border-color:#6ea8fe;
     }
+    .actions{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .btn{
+      appearance:none; border:1px solid #6ea8fe; background:#0f1330; color:var(--text);
+      padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:800; font-size:1rem;
+      box-shadow:0 2px 10px rgba(0,0,0,.25);
+    }
+    .btn:hover{background:#13205a}
+    .btn.primary{background:var(--accent); color:#0a0f2a; border-color:#6ea8fe}
+    .btn.primary:hover{filter:brightness(0.95)}
+
+    /* Mobile sticky bar */
+    .sticky-bar{
+      position:fixed; left:0; right:0; bottom:0; z-index:1000;
+      background:rgba(15,19,48,.9); backdrop-filter: blur(6px);
+      border-top:1px solid #2a2f58;
+      padding:10px 12px;
+      display:flex; gap:10px; justify-content:center; align-items:center;
+    }
+    .sticky-bar .btn{flex:1; max-width:520px}
+    @media (min-width:880px){
+      /* Hide sticky bar on desktop (we show the normal button) */
+      .sticky-bar{display:none}
+      body{padding-bottom:0}
+    }
+
+    footer{opacity:.8; text-align:center; padding:20px; color:var(--muted); font-size:.85rem}
     .title-line{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
   </style>
 </head>
@@ -69,17 +94,27 @@
     <div class="grid">
       <section class="card">
         <h2>Inputs</h2>
-        <label for="volume">Daily Volume (enter a number &mdash; currency-agnostic)</label>
+        <label for="volume">Daily Volume</label>
         <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
+
         <div class="row">
           <div>
             <label for="holdings">Your Holdings (tokens)</label>
             <input id="holdings" type="number" min="0" step="0.000000001" placeholder="e.g., 1_000_000" />
           </div>
           <div>
-            <label for="supply">Total Current Supply (adjustable)</label>
+            <label for="supply">Total Current Supply</label>
             <input id="supply" type="number" min="0" step="0.000000001" />
-            <div class="help">Prefilled: 860,958,483.734133327</div>
+            <div class="help">Editable (prefilled automatically)</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="calcBtn" class="btn primary">Calculate My Rewards</button>
+          <div class="seg" role="tablist" aria-label="Projection period">
+            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
+            <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
+            <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
           </div>
         </div>
       </section>
@@ -87,11 +122,6 @@
       <section class="card">
         <div class="title-line">
           <h2 id="rewardsTitle">Your estimated Daily $XRP Rewards</h2>
-          <div class="seg" role="tablist" aria-label="Projection period">
-            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
-            <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
-            <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
-          </div>
         </div>
         <div class="kpi">
           <div class="box">
@@ -119,11 +149,16 @@
     </div>
   </div>
 
+  <!-- Mobile sticky action bar -->
+  <div class="sticky-bar">
+    <button id="calcBtnSticky" class="btn primary">Calculate My Rewards</button>
+  </div>
+
   <footer>© 2025 $FSWITCH Rewards Calculator</footer>
 
   <script>
-    // INTERNAL CONSTANTS (hidden from UI)
-    const INTERNAL_HOLDER_RATE = 0.0455; // hidden actual % used in math
+    // Hidden math rate (do not show in UI)
+    const INTERNAL_HOLDER_RATE = 0.0455; // 4.55%
 
     const els = {
       volume: document.getElementById('volume'),
@@ -138,8 +173,11 @@
       btnDaily: document.getElementById('btnDaily'),
       btnWeekly: document.getElementById('btnWeekly'),
       btnMonthly: document.getElementById('btnMonthly'),
+      calcBtn: document.getElementById('calcBtn'),
+      calcBtnSticky: document.getElementById('calcBtnSticky'),
     };
 
+    // Auto-populate supply; still editable
     els.supply.value = "860958483.734133327";
 
     const PERIODS = {
@@ -166,7 +204,6 @@
       els.btnDaily.setAttribute('aria-pressed', String(name==="Daily"));
       els.btnWeekly.setAttribute('aria-pressed', String(name==="Weekly"));
       els.btnMonthly.setAttribute('aria-pressed', String(name==="Monthly"));
-      recalc();
     }
 
     function recalc(){
@@ -175,8 +212,8 @@
       const supply = parseFloat(els.supply.value) || 0;
 
       const ownership = supply > 0 ? (holdings / supply) : 0;
-      const holdersPool = volume * INTERNAL_HOLDER_RATE;
-      const shareOfSeven = INTERNAL_HOLDER_RATE * ownership;
+      const holdersPool = volume * INTERNAL_HOLDER_RATE;   // per day
+      const shareOfSeven = INTERNAL_HOLDER_RATE * ownership; // fraction of daily volume
       const periodMult = PERIODS[currentPeriod].mult;
       const yourRewards = volume * shareOfSeven * periodMult;
 
@@ -186,12 +223,18 @@
       els.shareOfSeven.textContent = fmtPct(shareOfSeven, 6);
     }
 
-    ['input','change','keyup'].forEach(ev => {
-      els.volume.addEventListener(ev, recalc);
-      els.holdings.addEventListener(ev, recalc);
-      els.supply.addEventListener(ev, recalc);
-    });
+    // Buttons: desktop and mobile sticky both trigger the same calc
+    els.calcBtn.addEventListener('click', recalc);
+    els.calcBtnSticky.addEventListener('click', recalc);
 
-    els.btnDaily.addEventListener('click', () => setPeriod('Daily'));
-    els.btnWeekly.addEventListener('click', () => setPeriod('Weekly'));
-    els.btnMonthly.addEventListener('
+    // Period toggle buttons
+    els.btnDaily.addEventListener('click', () => { setPeriod('Daily'); recalc(); });
+    els.btnWeekly.addEventListener('click', () => { setPeriod('Weekly'); recalc(); });
+    els.btnMonthly.addEventListener('click', () => { setPeriod('Monthly'); recalc(); });
+
+    // Initial render
+    setPeriod('Daily');
+    recalc();
+  </script>
+</body>
+</html>
