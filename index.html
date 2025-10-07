@@ -1,50 +1,318 @@
-<header class="hero">
-  <img src="IMG_3124.jpeg" alt="$FLIPSWITCH header" class="hero-img">
-  <div class="hero-overlay">
-    <h1>$FLIPSWITCH Rewards Calculator</h1>
-    <p class="sub">Estimate your holder rewards based on daily volume and your ownership.</p>
-  </div>
-</header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>$FSWITCH Rewards Calculator</title>
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="fswitch_icon_512.png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0a0c12">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="$FSWITCH Rewards Calculator">
+<meta property="og:description" content="Estimate your Daily / Weekly / Monthly / Annual $XRP rewards.">
+<meta property="og:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="$FSWITCH Rewards Calculator">
+<meta name="twitter:description" content="Estimate your Daily / Weekly / Monthly / Annual $XRP rewards.">
+<meta name="twitter:image" content="https://rewardsguru.github.io/flipswitch-rewards-calculator/fswitch_og_1200x630.jpg">
 
 <style>
-.hero {
-  position: relative;
-  width: 100%;
-  height: clamp(250px, 40vw, 440px);
-  overflow: hidden;
-  border-radius: 0 0 22px 22px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.65);
+:root{
+  --bg:#0b0f1c; --text:#e9ecf2; --muted:#a8b0c2; --accent:#67c6ff;
+  --fire1:#ff5a00; --fire2:#ff7a1a;
+  --bolt-core:#eaf6ff; --bolt-blue:#66c7ff;
+  --glass:#0a0e17; --glass-border:#253049;
 }
-.hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: brightness(0.85) contrast(1.1) saturate(1.2);
+*{box-sizing:border-box}
+html,body{height:100%}
+
+/* Base dark */
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+  color:var(--text); line-height:1.45; padding-bottom:84px;
+  background:linear-gradient(180deg,#090d18 0%, var(--bg) 60%);
+  overflow-x:hidden;
 }
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background: radial-gradient(rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.7) 100%);
+
+/* ===== Crackling lightning background (full page) ===== */
+.bg-lightning{position:fixed; inset:0; z-index:0; pointer-events:none}
+.bg-lightning svg{width:100%; height:100%; display:block; filter:contrast(140%)}
+@keyframes flick1{0%,9%{opacity:.15}10%{opacity:1}12%{opacity:.2}22%{opacity:.9}25%,100%{opacity:.18}}
+@keyframes flick2{0%,14%{opacity:.1}15%{opacity:.95}17%{opacity:.18}40%{opacity:.7}43%,100%{opacity:.15}}
+@keyframes flick3{0%,39%{opacity:.12}40%{opacity:1}42%{opacity:.2}58%{opacity:.85}60%,100%{opacity:.16}}
+@keyframes flash{0%{opacity:0}5%{opacity:.35}8%{opacity:0}100%{opacity:0}}
+
+/* Content above lightning */
+header, .wrap, .sticky-bar, footer{position:relative; z-index:1}
+
+/* ===== Header (original banner + title below it) ===== */
+header{padding:16px 16px 8px; text-align:center}
+header h1{
+  margin:.6rem 0 0; font-size:1.6rem; font-weight:900; letter-spacing:.3px;
+  text-shadow:0 2px 12px rgba(103,198,255,.18), 0 0 10px rgba(0,0,0,.6);
 }
-.hero-overlay h1 {
-  font-size: clamp(1.8rem, 5vw, 3.2rem);
-  font-weight: 900;
-  background: linear-gradient(180deg, #ffbb6e 0%, #ff6a00 50%, #b84800 90%);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 2px 8px rgba(255,130,0,0.6), 0 0 25px rgba(255,100,0,0.4);
-  letter-spacing: 0.5px;
-  margin: 0;
+header p{margin:.25rem 0; color:var(--muted); font-size:.95rem; text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.banner{
+  width:100%; max-height:360px; display:block; object-fit:cover; border-radius:12px;
+  margin:8px auto; box-shadow:0 10px 28px rgba(0,0,0,.45)
 }
-.hero-overlay .sub {
-  color: #d8d8e0;
-  font-size: 1rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
-  margin-top: 0.6rem;
+
+/* ===== Transparent layout (only inputs/toggles/buttons are glassy) ===== */
+.wrap{max-width:980px; margin:0 auto; padding:18px 16px 32px}
+.grid{display:grid; grid-template-columns:1fr; gap:28px}
+@media (min-width:880px){ .grid{grid-template-columns:1fr 1fr} }
+
+.card{ background:transparent; border:0; box-shadow:none; padding:12px 0; }
+.card h2{
+  margin:.1rem 0 .6rem; font-size:1.05rem; letter-spacing:.3px;
+  text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 10px rgba(103,198,255,.15);
+}
+
+label{display:block; font-weight:800; margin:.55rem 0 .3rem; color:var(--muted); text-shadow:0 2px 8px rgba(0,0,0,.7)}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+/* Glassy inputs (only opaque zones) */
+input{
+  width:100%; padding:12px 14px; border-radius:14px;
+  background:rgba(10,14,23,.86); backdrop-filter: blur(8px);
+  border:1px solid var(--glass-border); color:var(--text); font-size:1rem;
+  outline:none; transition:border-color .2s ease, box-shadow .25s ease, background .25s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+input:focus{
+  border-color:transparent; background:rgba(11,16,25,.92);
+  box-shadow:
+    0 0 0 2px rgba(255,122,26,.85),
+    0 0 22px 10px rgba(255,90,0,.32),
+    inset 0 0 12px rgba(255,208,138,.18);
+}
+
+/* Period toggle (glassy) */
+.seg{
+  display:inline-flex; gap:6px; padding:6px 6px;
+  background:rgba(10,14,23,.72); backdrop-filter: blur(8px);
+  border:1px solid var(--glass-border); border-radius:999px; margin:8px 0 4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.seg button{
+  appearance:none; border:1px solid transparent; background:transparent; color:var(--text);
+  padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:800; font-size:.95rem;
+}
+.seg button[aria-pressed="true"]{
+  background:linear-gradient(180deg,var(--fire2),var(--fire1));
+  color:#190c04; border-color:#ff6a10; text-shadow:0 1px 0 rgba(255,240,210,.6);
+  box-shadow:0 6px 16px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset;
+}
+
+/* Buttons (opaque/action) */
+.btn{
+  appearance:none; border:1px solid #ff6a10;
+  background:linear-gradient(180deg,var(--fire2),var(--fire1)); color:#190c04;
+  padding:12px 16px; border-radius:14px; cursor:pointer; font-weight:900; font-size:1rem;
+  text-shadow:0 1px 0 rgba(255,240,210,.6);
+  box-shadow:0 10px 24px rgba(255,90,0,.35), 0 0 0 2px rgba(255,122,26,.35) inset;
+}
+
+/* KPIs transparent outlined */
+.kpi{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px}
+.kpi .box{
+  background:transparent; border:1px solid rgba(103,198,255,.25);
+  border-radius:12px; padding:12px; box-shadow:none;
+}
+.box h3{margin:0; font-size:.9rem; color:var(--muted); font-weight:700; text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.val{font-weight:900; font-size:1.25rem; margin-top:6px; text-shadow:0 2px 10px rgba(0,0,0,.65), 0 0 10px rgba(103,198,255,.18)}
+
+/* Sticky bar floats above footer */
+.sticky-bar{
+  position:fixed; left:0; right:0; bottom:0;
+  z-index:9999; background:rgba(10,14,22,.92); backdrop-filter:blur(6px);
+  border-top:1px solid var(--glass-border);
+  padding:10px 12px max(10px, env(safe-area-inset-bottom));
+  display:flex; gap:10px; justify-content:center; align-items:center;
+  box-shadow:0 -6px 18px rgba(0,0,0,.45);
+}
+.sticky-bar .btn{flex:1; max-width:520px}
+@media (max-width:879.98px){
+  footer{margin-bottom:calc(76px + env(safe-area-inset-bottom))}
+}
+@media (min-width:880px){ .sticky-bar{display:none} body{padding-bottom:0} }
+
+/* Footer */
+footer{opacity:.9; text-align:center; padding:30px 10px 40px; color:var(--muted); font-size:.85rem; position:relative; z-index:1}
+footer img{margin-top:10px; width:220px; height:auto; opacity:0.95; border-radius:6px}
+
+/* iOS focus zoom prevention */
+@supports (-webkit-touch-callout: none){ input{ font-size:16px } }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .bg-lightning .bolt, .bg-lightning .flash { animation: none !important; opacity: .18 !important; }
+  *{ transition:none !important; }
 }
 </style>
+</head>
+
+<body>
+  <!-- Lightning layer -->
+  <div class="bg-lightning" aria-hidden="true">
+    <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <filter id="boltGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="boltStroke" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--bolt-core)"/><stop offset="100%" stop-color="var(--bolt-blue)"/>
+        </linearGradient>
+      </defs>
+      <rect class="flash" x="0" y="0" width="1000" height="1000" fill="rgba(180,225,255,0.10)" style="animation:flash 3.4s infinite both"/>
+      <g stroke="url(#boltStroke)" stroke-width="3.2" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick1 2.8s infinite">
+        <path d="M 50 120 L 220 280 L 380 470 L 560 650 L 700 760 L 780 820"/>
+        <path d="M 200 40 L 320 160 L 430 260 L 520 360 L 650 450 L 790 560 L 860 640"/>
+      </g>
+      <g stroke="url(#boltStroke)" stroke-width="2.6" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick2 3.6s infinite">
+        <path d="M 980 120 L 840 240 L 700 420 L 560 560 L 430 720 L 290 860"/>
+        <path d="M 860 740 L 720 820 L 610 900 L 480 960 L 420 980"/>
+      </g>
+      <g stroke="url(#boltStroke)" stroke-width="2.2" stroke-linecap="round" fill="none" filter="url(#boltGlow)" class="bolt" style="animation:flick3 2.2s infinite">
+        <path d="M 120 300 L 290 430 L 450 560 L 610 670 L 760 770"/>
+        <path d="M 220 120 L 340 210 L 460 300 L 580 400 L 640 440"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ORIGINAL header & title -->
+  <header>
+    <img src="fswitch_banner_1500x500%201.jpg" alt="$FSWITCH banner" class="banner" onerror="this.style.display='none'">
+    <h1>$FSWITCH Rewards Calculator</h1>
+    <p class="help">Estimate your holder rewards based on daily volume and your ownership.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>Inputs</h2>
+
+        <label for="volume">Daily Volume $</label>
+        <input id="volume" type="number" min="0" step="0.01" placeholder="e.g., 100000" />
+
+        <div class="row">
+          <div>
+            <label for="holdings">Your Holdings (tokens)</label>
+            <input id="holdings" type="number" min="0" step="0.000000001" placeholder="e.g., 1_000_000" />
+          </div>
+          <div>
+            <label for="supply">Total Current Supply</label>
+            <input id="supply" type="number" min="0" step="0.000000001" />
+            <div class="help">Editable (prefilled automatically)</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="calcBtn" class="btn primary">Calculate My Rewards</button>
+          <div class="seg" role="tablist" aria-label="Projection period">
+            <button id="btnDaily"  role="tab" aria-pressed="true">Daily</button>
+            <button id="btnWeekly" role="tab" aria-pressed="false">Weekly</button>
+            <button id="btnMonthly" role="tab" aria-pressed="false">Monthly</button>
+            <button id="btnAnnual" role="tab" aria-pressed="false">Annual</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="rewardsTitle">Your estimated Daily Rewards $ of XRP</h2>
+        <div class="kpi">
+          <div class="box">
+            <h3>Your Ownership</h3>
+            <div class="val" id="ownership">0.000000%</div>
+            <div class="help">= holdings / total supply</div>
+          </div>
+          <div class="box">
+            <h3 id="periodRewardsLabel">Your Rewards $ of XRP (per day)</h3>
+            <div class="val" id="yourRewards">0.00</div>
+            <div class="help">Proportional to your ownership and period</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Sticky action bar -->
+  <div class="sticky-bar">
+    <button id="calcBtnSticky" class="btn primary">Calculate My Rewards</button>
+  </div>
+
+  <footer>
+    <p>© 2025 $FSWITCH Rewards Calculator</p>
+    <img src="CosmicEnergyofFSWITCH.png" alt="Powered by $FSWITCH">
+  </footer>
+
+  <script>
+  const INTERNAL_HOLDER_RATE=0.0455;
+  const els={
+    volume:document.getElementById('volume'),
+    holdings:document.getElementById('holdings'),
+    supply:document.getElementById('supply'),
+    ownership:document.getElementById('ownership'),
+    yourRewards:document.getElementById('yourRewards'),
+    rewardsTitle:document.getElementById('rewardsTitle'),
+    periodRewardsLabel:document.getElementById('periodRewardsLabel'),
+    btnDaily:document.getElementById('btnDaily'),
+    btnWeekly:document.getElementById('btnWeekly'),
+    btnMonthly:document.getElementById('btnMonthly'),
+    btnAnnual:document.getElementById('btnAnnual'),
+    calcBtn:document.getElementById('calcBtn'),
+    calcBtnSticky:document.getElementById('calcBtnSticky'),
+  };
+
+  els.supply.value="860958483.734133327";
+
+  const PERIODS={
+    Daily:{mult:1,title:"Your estimated Daily Rewards $ of XRP",label:"Your Rewards $ of XRP (per day)"},
+    Weekly:{mult:7,title:"Your estimated Weekly Rewards $ of XRP",label:"Your Rewards $ of XRP (per week)"},
+    Monthly:{mult:30,title:"Your estimated Monthly Rewards $ of XRP",label:"Your Rewards $ of XRP (per month)"},
+    Annual:{mult:365,title:"Your estimated Annual Rewards $ of XRP",label:"Your Rewards $ of XRP (per year)"}
+  };
+  let currentPeriod="Daily";
+
+  const fmtNum=(n,d=2)=>isFinite(n)?Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d}):"0.00";
+  const fmtPct=(x,d=6)=>isFinite(x)?(x*100).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d})+"%":"0.000000%";
+
+  function setPeriod(name){
+    currentPeriod=name;
+    const c=PERIODS[name];
+    els.rewardsTitle.textContent=c.title;
+    els.periodRewardsLabel.textContent=c.label;
+    els.btnDaily.setAttribute('aria-pressed',name==="Daily");
+    els.btnWeekly.setAttribute('aria-pressed',name==="Weekly");
+    els.btnMonthly.setAttribute('aria-pressed',name==="Monthly");
+    els.btnAnnual.setAttribute('aria-pressed',name==="Annual");
+  }
+
+  function recalc(){
+    const v=parseFloat(els.volume.value)||0;
+    const h=parseFloat(els.holdings.value)||0;
+    const s=parseFloat(els.supply.value)||0;
+    const own=s>0?(h/s):0;
+    const mult=PERIODS[currentPeriod].mult;
+    const rew=v*INTERNAL_HOLDER_RATE*own*mult;
+    els.ownership.textContent=fmtPct(own,6);
+    els.yourRewards.textContent=fmtNum(rew,2);
+  }
+
+  els.calcBtn.addEventListener('click',recalc);
+  els.calcBtnSticky.addEventListener('click',recalc);
+  els.btnDaily.addEventListener('click',()=>{setPeriod('Daily');recalc()});
+  els.btnWeekly.addEventListener('click',()=>{setPeriod('Weekly');recalc()});
+  els.btnMonthly.addEventListener('click',()=>{setPeriod('Monthly');recalc()});
+  els.btnAnnual.addEventListener('click',()=>{setPeriod('Annual');recalc()});
+  </script>
+</body>
+</html>
